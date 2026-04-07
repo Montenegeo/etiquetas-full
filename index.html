@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversor Etiquetas FULL — Montenegro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f172a;
+    --surface:  #1e293b;
+    --border:   #334155;
+    --blue:     #2563eb;
+    --blue-h:   #1d4ed8;
+    --blue-l:   #3b82f6;
+    --text:     #e2e8f0;
+    --muted:    #94a3b8;
+    --success:  #22c55e;
+    --warn:     #f59e0b;
+    --danger:   #ef4444;
+    --radius:   10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo {
+    width: 38px; height: 38px;
+    background: var(--blue);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-weight: 900; font-size: 18px; color: #fff;
+    flex-shrink: 0;
+  }
+  .header-text h1 { font-size: 17px; font-weight: 700; }
+  .header-text p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 880px;
+    margin: 32px auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── UPLOAD ZONE ── */
+  #drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  #drop-zone.over, #drop-zone:hover {
+    border-color: var(--blue-l);
+    background: rgba(37,99,235,.07);
+  }
+  #drop-zone svg { display: block; margin: 0 auto 14px; opacity: .5; }
+  #drop-zone p   { font-size: 14px; color: var(--muted); }
+  #drop-zone strong { color: var(--blue-l); }
+  #file-input { display: none; }
+
+  /* ── CONFIG GRID ── */
+  .config-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .field input, .field select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus { border-color: var(--blue-l); }
+
+  /* ── MODE TABS ── */
+  .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .mode-tab {
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .mode-tab.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    background: rgba(37,99,235,.12);
+    border: 1px solid rgba(59,130,246,.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #93c5fd;
+    line-height: 1.5;
+  }
+  .info-box strong { color: #bfdbfe; }
+
+  /* ── PREVIEW ── */
+  #preview-section { display: none; }
+  .pages-title {
+    font-size: 13px; color: var(--muted);
+    margin-bottom: 12px;
+  }
+  #pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  .page-thumb {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .page-thumb:hover { border-color: var(--blue-l); }
+  .page-thumb canvas { display: block; width: 100%; height: auto; }
+  .page-thumb .thumb-label {
+    text-align: center; padding: 4px;
+    font-size: 11px; color: var(--muted);
+  }
+
+  /* ── LABELS PREVIEW ── */
+  #labels-section { display: none; }
+  #labels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  #labels-grid::-webkit-scrollbar { width: 4px; }
+  #labels-grid::-webkit-scrollbar-track { background: var(--bg); }
+  #labels-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .label-thumb {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .label-thumb canvas { display: block; width: 100%; height: auto; }
+  .label-thumb .lbl { font-size: 10px; color: var(--muted); text-align: center; padding: 3px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+  }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-primary  { background: var(--blue); color: #fff; }
+  .btn-primary:hover:not(:disabled)  { background: var(--blue-h); }
+  .btn-success  { background: #16a34a; color: #fff; }
+  .btn-success:hover:not(:disabled)  { background: #15803d; }
+  .btn-outline  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover:not(:disabled)  { border-color: var(--blue-l); color: var(--blue-l); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  /* ── PROGRESS ── */
+  #progress-bar-wrap {
+    display: none;
+    background: var(--bg);
+    border-radius: 6px;
+    height: 6px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 6px;
+    transition: width .1s;
+    width: 0%;
+  }
+  #progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    display: none;
+  }
+
+  /* ── STATUS BADGE ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .03em;
+  }
+  .badge-blue    { background: rgba(37,99,235,.2); color: #93c5fd; }
+  .badge-green   { background: rgba(34,197,94,.15); color: #86efac; }
+  .badge-warn    { background: rgba(245,158,11,.15); color: #fcd34d; }
+
+  /* ── FOOTER NOTE ── */
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* scrollbar global */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">M</div>
+  <div class="header-text">
+    <h1>Conversor Etiquetas FULL</h1>
+    <p>A4 → Térmica 80×25mm · Montenegro Indústria</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- UPLOAD -->
+  <div class="card">
+    <div class="card-title">1 · Selecionar PDF</div>
+    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="12" y1="18" x2="12" y2="12"/>
+        <polyline points="9 15 12 12 15 15"/>
+      </svg>
+      <p><strong>Clique para selecionar</strong> ou arraste o PDF aqui</p>
+      <p style="margin-top:6px;font-size:12px;">PDF com etiquetas A4 do Shopee FULL</p>
+    </div>
+    <input type="file" id="file-input" accept=".pdf">
+    <div id="file-info" style="display:none;margin-top:12px;" class="info-box">
+      <strong id="file-name"></strong> · <span id="file-pages"></span>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="card">
+    <div class="card-title">2 · Configurar Layout</div>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="setMode('grid')" id="tab-grid">Grade (múltiplas por página)</button>
+      <button class="mode-tab" onclick="setMode('single')" id="tab-single">Uma por página (escala)</button>
+    </div>
+
+    <div id="config-grid">
+      <div class="config-row">
+        <div class="field">
+          <label>Colunas no A4</label>
+          <input type="number" id="cols" value="2" min="1" max="20">
+        </div>
+        <div class="field">
+          <label>Linhas no A4</label>
+          <input type="number" id="rows" value="10" min="1" max="50">
+        </div>
+        <div class="field">
+          <label>Margem topo/base (mm)</label>
+          <input type="number" id="margin-v" value="5" min="0" max="30" step="0.5">
+        </div>
+        <div class="field">
+          <label>Margem esq/dir (mm)</label>
+          <input type="number" id="margin-h" value="5" min="0" max="30" step="0.5">
+        </div>
+      </div>
+      <div style="margin-top:12px;" class="info-box">
+        Grade detectada: <strong id="grid-info">2 colunas × 10 linhas = 20 etiquetas por página</strong>
+      </div>
+    </div>
+
+    <div id="config-single" style="display:none;">
+      <div class="info-box">
+        Cada página do PDF A4 será tratada como <strong>1 etiqueta</strong> e
+        redimensionada para caber em 80×25mm. Ideal quando o PDF já vem com
+        uma etiqueta por folha.
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="card-title" style="margin-bottom:12px;">Dimensões de saída</div>
+      <div class="config-row">
+        <div class="field">
+          <label>Largura saída (mm)</label>
+          <input type="number" id="out-w" value="80" min="10" max="200" step="0.5">
+        </div>
+        <div class="field">
+          <label>Altura saída (mm)</label>
+          <input type="number" id="out-h" value="25" min="5" max="200" step="0.5">
+        </div>
+        <div class="field">
+          <label>Resolução (DPI)</label>
+          <select id="dpi">
+            <option value="150">150 DPI (rápido)</option>
+            <option value="200" selected>200 DPI (recomendado)</option>
+            <option value="300">300 DPI (alta qualidade)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Orientação</label>
+          <select id="orientation">
+            <option value="landscape">Paisagem (80×25)</option>
+            <option value="portrait">Retrato (25×80)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF PREVIEW -->
+  <div class="card" id="preview-section">
+    <div class="card-title">3 · Pré-visualização das Páginas</div>
+    <p class="pages-title" id="pages-count">—</p>
+    <div id="pages-grid"></div>
+  </div>
+
+  <!-- PROCESS -->
+  <div class="card">
+    <div class="card-title">4 · Processar e Baixar</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-process" onclick="processAll()" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Converter PDF
+      </button>
+      <button class="btn btn-success" id="btn-download" onclick="downloadResult()" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Baixar PDF Térmico
+      </button>
+      <button class="btn btn-outline" id="btn-reset" onclick="resetAll()" style="display:none">
+        Reiniciar
+      </button>
+    </div>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+    <div id="progress-label"></div>
+    <div id="result-info" style="margin-top:12px;display:none;" class="info-box"></div>
+  </div>
+
+  <!-- LABELS PREVIEW -->
+  <div class="card" id="labels-section">
+    <div class="card-title">Pré-visualização das Etiquetas Geradas</div>
+    <p class="pages-title" id="labels-count">—</p>
+    <div id="labels-grid"></div>
+  </div>
+
+  <div class="footer-note">
+    Processamento 100% local · nenhum arquivo é enviado para servidores · Montenegro Indústria
+  </div>
+
+</main>
+
+<script>
+// ── PDF.js worker ──────────────────────────────────────────────────────────
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ── State ──────────────────────────────────────────────────────────────────
+let pdfDoc      = null;
+let resultPDF   = null;
+let labelImages = [];
+let mode        = 'grid';   // 'grid' | 'single'
+
+// ── Mode tabs ──────────────────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('tab-grid').classList.toggle('active', m === 'grid');
+  document.getElementById('tab-single').classList.toggle('active', m === 'single');
+  document.getElementById('config-grid').style.display   = m === 'grid'   ? '' : 'none';
+  document.getElementById('config-single').style.display = m === 'single' ? '' : 'none';
+}
+
+// ── Grid info live update ──────────────────────────────────────────────────
+['cols','rows','margin-v','margin-h'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateGridInfo);
+});
+function updateGridInfo() {
+  const c = parseInt(document.getElementById('cols').value) || 1;
+  const r = parseInt(document.getElementById('rows').value) || 1;
+  document.getElementById('grid-info').textContent =
+    `${c} colunas × ${r} linhas = ${c*r} etiquetas por página`;
+}
+
+// ── Drag & drop ────────────────────────────────────────────────────────────
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type === 'application/pdf') handleFile(f);
+  else alert('Selecione um arquivo PDF.');
+});
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+// ── Load PDF ───────────────────────────────────────────────────────────────
+async function handleFile(file) {
+  resetAll(false);
+  const buf = await file.arrayBuffer();
+  pdfDoc = await pdfjsLib.getDocument(buf).promise;
+
+  document.getElementById('file-info').style.display = '';
+  document.getElementById('file-name').textContent   = file.name;
+  document.getElementById('file-pages').textContent  = `${pdfDoc.numPages} página(s)`;
+
+  await renderPreviews();
+  document.getElementById('btn-process').disabled = false;
+}
+
+// ── Render page thumbnails ─────────────────────────────────────────────────
+async function renderPreviews() {
+  const grid = document.getElementById('pages-grid');
+  grid.innerHTML = '';
+  const total = pdfDoc.numPages;
+  document.getElementById('pages-count').textContent = `${total} página(s) no PDF`;
+  document.getElementById('preview-section').style.display = '';
+
+  for (let n = 1; n <= total; n++) {
+    const page     = await pdfDoc.getPage(n);
+    const vp       = page.getViewport({ scale: 0.3 });
+    const canvas   = document.createElement('canvas');
+    canvas.width   = vp.width;
+    canvas.height  = vp.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'page-thumb';
+    wrap.appendChild(canvas);
+    const lbl = document.createElement('div');
+    lbl.className = 'thumb-label';
+    lbl.textContent = `Pág. ${n}`;
+    wrap.appendChild(lbl);
+    grid.appendChild(wrap);
+  }
+}
+
+// ── Process all pages ──────────────────────────────────────────────────────
+async function processAll() {
+  if (!pdfDoc) return;
+
+  const outW   = parseFloat(document.getElementById('out-w').value) || 80;
+  const outH   = parseFloat(document.getElementById('out-h').value) || 25;
+  const dpi    = parseInt(document.getElementById('dpi').value) || 200;
+  const orient = document.getElementById('orientation').value;
+
+  const btnP = document.getElementById('btn-process');
+  btnP.disabled = true;
+  document.getElementById('progress-bar-wrap').style.display = '';
+  document.getElementById('progress-label').style.display    = '';
+
+  const { jsPDF } = window.jspdf;
+  const isLand  = orient === 'landscape';
+  const pdfW    = isLand ? outW : outH;
+  const pdfH    = isLand ? outH : outW;
+
+  const doc = new jsPDF({
+    orientation: orient,
+    unit: 'mm',
+    format: [pdfW, pdfH],
+    compress: true,
+  });
+
+  labelImages = [];
+  const total = pdfDoc.numPages;
+  let labelCount = 0;
+  let firstPage  = true;
+
+  for (let n = 1; n <= total; n++) {
+    setProgress(((n-1)/total)*90, `Processando página ${n} de ${total}…`);
+
+    const page = await pdfDoc.getPage(n);
+
+    // Scale page to target DPI (A4 = 210x297mm; 1mm = 3.7795px at 96dpi)
+    const scaleFactor = dpi / 72;  // PDF internal unit is pt (72dpi)
+    const vp = page.getViewport({ scale: scaleFactor });
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = vp.width;
+    canvas.height = vp.height;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+    let labels;
+    if (mode === 'grid') {
+      labels = extractGridLabels(canvas);
+    } else {
+      labels = [canvas.toDataURL('image/jpeg', 0.92)];
+    }
+
+    for (const imgData of labels) {
+      if (!firstPage) doc.addPage([pdfW, pdfH], orient);
+      firstPage = false;
+      doc.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH, '', 'FAST');
+      labelImages.push(imgData);
+      labelCount++;
+    }
+  }
+
+  setProgress(100, `Concluído! ${labelCount} etiqueta(s) gerada(s).`);
+  resultPDF = doc;
+
+  const info = document.getElementById('result-info');
+  info.style.display = '';
+  info.innerHTML = `✅ <strong>${labelCount} etiqueta(s)</strong> convertida(s) para ${outW}×${outH}mm · Pronto para imprimir na ELGIN.`;
+
+  document.getElementById('btn-download').disabled = false;
+  document.getElementById('btn-reset').style.display = '';
+
+  renderLabelPreviews();
+}
+
+// ── Extract labels from grid ───────────────────────────────────────────────
+function extractGridLabels(pageCanvas) {
+  const cols    = parseInt(document.getElementById('cols').value) || 2;
+  const rows    = parseInt(document.getElementById('rows').value) || 10;
+  const marginV = parseFloat(document.getElementById('margin-v').value) || 0;
+  const marginH = parseFloat(document.getElementById('margin-h').value) || 0;
+
+  // Convert mm margins to canvas pixels
+  // pageCanvas is rendered at `dpi`; A4 width = 210mm
+  const dpi = parseInt(document.getElementById('dpi').value) || 200;
+  const pxPerMm = dpi / 25.4;
+
+  const marginVpx = marginV * pxPerMm;
+  const marginHpx = marginH * pxPerMm;
+
+  const areaW = pageCanvas.width  - 2 * marginHpx;
+  const areaH = pageCanvas.height - 2 * marginVpx;
+  const cellW = areaW / cols;
+  const cellH = areaH / rows;
+
+  const result = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const sx = marginHpx + c * cellW;
+      const sy = marginVpx + r * cellH;
+
+      const lc = document.createElement('canvas');
+      lc.width  = Math.round(cellW);
+      lc.height = Math.round(cellH);
+      const lx = lc.getContext('2d');
+      lx.fillStyle = '#ffffff';
+      lx.fillRect(0, 0, lc.width, lc.height);
+      lx.drawImage(pageCanvas, sx, sy, cellW, cellH, 0, 0, lc.width, lc.height);
+
+      // Skip nearly-blank labels (white/empty)
+      if (!isBlankCanvas(lc)) {
+        result.push(lc.toDataURL('image/jpeg', 0.92));
+      }
+    }
+  }
+  return result;
+}
+
+// ── Blank detection ────────────────────────────────────────────────────────
+function isBlankCanvas(canvas) {
+  const ctx  = canvas.getContext('2d');
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let darkPixels = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+    if (brightness < 200) darkPixels++;
+  }
+  const ratio = darkPixels / (canvas.width * canvas.height);
+  return ratio < 0.005;  // < 0.5% dark pixels → blank
+}
+
+// ── Render label previews ──────────────────────────────────────────────────
+function renderLabelPreviews() {
+  const grid = document.getElementById('labels-grid');
+  grid.innerHTML = '';
+  document.getElementById('labels-section').style.display = '';
+  document.getElementById('labels-count').textContent = `${labelImages.length} etiqueta(s) prontas para impressão`;
+
+  labelImages.forEach((src, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'label-thumb';
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width  = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    const lbl = document.createElement('div');
+    lbl.className   = 'lbl';
+    lbl.textContent = `#${i+1}`;
+    wrap.appendChild(img);
+    wrap.appendChild(lbl);
+    grid.appendChild(wrap);
+  });
+}
+
+// ── Download ───────────────────────────────────────────────────────────────
+function downloadResult() {
+  if (!resultPDF) return;
+  const outW  = document.getElementById('out-w').value;
+  const outH  = document.getElementById('out-h').value;
+  resultPDF.save(`etiquetas_full_${outW}x${outH}mm_${labelImages.length}un.pdf`);
+}
+
+// ── Progress ───────────────────────────────────────────────────────────────
+function setProgress(pct, msg) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = msg;
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+function resetAll(full = true) {
+  if (full) {
+    pdfDoc    = null;
+    resultPDF = null;
+    labelImages = [];
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-info').style.display = 'none';
+    document.getElementById('preview-section').style.display = 'none';
+    document.getElementById('pages-grid').innerHTML = '';
+  }
+  document.getElementById('btn-process').disabled   = full;
+  document.getElementById('btn-download').disabled  = true;
+  document.getElementById('btn-reset').style.display = full ? 'none' : '';
+  document.getElementById('progress-bar-wrap').style.display = 'none';
+  document.getElementById('progress-label').style.display    = 'none';
+  document.getElementById('progress-bar').style.width        = '0%';
+  document.getElementById('result-info').style.display       = 'none';
+  document.getElementById('labels-section').style.display    = 'none';
+  document.getElementById('labels-grid').innerHTML = '';
+}
+
+// init
+updateGridInfo();
+</script>
+</body>
+</html>
