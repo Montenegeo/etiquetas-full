@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Etiquetas FULL · Montenegro</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
 <style>
 /* ── PRINT STYLES (o que a impressora vê) ──────────────────────────────── */
@@ -212,8 +212,11 @@ footer { margin-top: 44px; font-size: 11px; color: #475569; text-align: center; 
 <footer>Processamento local · nenhum dado enviado para servidores · Montenegro Indústria</footer>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// fallback worker inline se CDN falhar
+try {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+} catch(e) { console.error('pdfjs init', e); }
 
 // ── Config hardcoded para Print_Barcode FULL ───────────────────────────────
 const CFG = {
@@ -244,15 +247,21 @@ document.getElementById('file-input').addEventListener('change', e => {
 // ── Carregar PDF ───────────────────────────────────────────────────────────
 async function loadPDF(file) {
   resetAll(false);
-  const buf = await file.arrayBuffer();
-  pdfDoc = await pdfjsLib.getDocument(buf).promise;
-
-  document.getElementById('fn').textContent = file.name;
-  document.getElementById('fm').textContent =
-    `${pdfDoc.numPages} página(s) · estimativa: até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
-  document.getElementById('status').style.display = '';
-  document.getElementById('btn-proc').disabled = false;
-  setMsg('Arquivo carregado. Clique em "Identificar etiquetas".');
+  showErr('');
+  try {
+    if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js não carregou. Verifique sua conexão e recarregue a página.');
+    const buf = await file.arrayBuffer();
+    pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+    document.getElementById('fn').textContent = file.name;
+    document.getElementById('fm').textContent =
+      `${pdfDoc.numPages} página(s) · estimativa: até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
+    document.getElementById('status').style.display = '';
+    document.getElementById('btn-proc').disabled = false;
+    setMsg('Arquivo carregado. Clique em "Identificar etiquetas".');
+  } catch(e) {
+    showErr('Erro ao abrir o PDF: ' + e.message);
+    console.error(e);
+  }
 }
 
 // ── Processar: extrair etiquetas da grade 4×6 ─────────────────────────────
@@ -404,6 +413,17 @@ function setProgress(pct, msg) {
   document.getElementById('prog-msg').textContent = msg;
 }
 function setMsg(msg) { document.getElementById('prog-msg').textContent = msg; }
+function showErr(msg) {
+  let el = document.getElementById('err-box');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'err-box';
+    el.style.cssText = 'width:100%;max-width:500px;margin-top:14px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px 16px;font-size:13px;color:#fca5a5;display:none;';
+    document.querySelector('label#drop-zone').after(el);
+  }
+  el.textContent = msg;
+  el.style.display = msg ? '' : 'none';
+}
 
 function resetAll(full = true) {
   if (full) {
