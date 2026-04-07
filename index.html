@@ -5,176 +5,227 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Etiquetas FULL · Montenegro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
+/* ── PRINT STYLES (o que a impressora vê) ──────────────────────────────── */
+@media print {
+  @page {
+    size: 80mm 25mm;
+    margin: 0;
+  }
+  body > *:not(#print-area) { display: none !important; }
+  #print-area {
+    display: block !important;
+    visibility: visible !important;
+  }
+  .strip {
+    width: 80mm;
+    height: 25mm;
+    display: flex;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+  }
+  .cell {
+    width: 40mm;
+    height: 25mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cell img {
+    max-width: 38mm;
+    max-height: 23mm;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+  .cell-empty { background: #fff; }
+}
+
+/* ── SCREEN STYLES ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
   --bg: #0f172a; --surface: #1e293b; --border: #334155;
   --blue: #2563eb; --blue-h: #1d4ed8; --text: #e2e8f0; --muted: #94a3b8;
 }
+
 body {
   background: var(--bg); color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-  padding: 48px 20px;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; padding: 44px 20px 64px;
 }
 
 .logo {
-  width: 48px; height: 48px; background: var(--blue); border-radius: 12px;
-  display: grid; place-items: center; font-weight: 900; font-size: 22px;
-  color: #fff; margin-bottom: 16px;
+  width: 46px; height: 46px; background: var(--blue); border-radius: 12px;
+  display: grid; place-items: center; font-weight: 900; font-size: 21px;
+  color: #fff; margin-bottom: 14px; flex-shrink: 0;
 }
-h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-.sub { font-size: 14px; color: var(--muted); margin-bottom: 40px; }
+h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+.sub { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
 
-/* Drop zone */
+/* Upload */
 #drop-zone {
-  width: 100%; max-width: 520px;
+  width: 100%; max-width: 500px;
   border: 2px dashed var(--border); border-radius: 14px;
-  padding: 56px 32px; text-align: center; cursor: pointer;
-  transition: border-color .2s, background .2s;
-  background: var(--surface);
+  padding: 52px 28px; text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s; background: var(--surface);
 }
-#drop-zone.over, #drop-zone:hover {
-  border-color: #3b82f6; background: rgba(37,99,235,.07);
-}
-#drop-zone svg { display: block; margin: 0 auto 16px; opacity: .45; }
+#drop-zone.over, #drop-zone:hover { border-color: #3b82f6; background: rgba(37,99,235,.07); }
+#drop-zone svg { display: block; margin: 0 auto 14px; opacity: .45; }
 #drop-zone .cta { font-size: 16px; font-weight: 600; color: #3b82f6; }
-#drop-zone .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+#drop-zone .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
 #file-input { display: none; }
 
-/* Status card */
-#status-card {
-  display: none; width: 100%; max-width: 520px;
+/* Status */
+#status {
+  display: none; width: 100%; max-width: 500px;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 28px 28px 24px; margin-top: 20px;
+  border-radius: 14px; padding: 24px; margin-top: 18px;
 }
-.file-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.file-icon { width: 36px; height: 36px; background: rgba(37,99,235,.15); border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
-.file-name { font-size: 14px; font-weight: 600; }
-.file-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.frow { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.ficon { width: 34px; height: 34px; background: rgba(37,99,235,.15); border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
+.fname { font-size: 14px; font-weight: 600; }
+.fmeta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-/* Progress */
-#prog-wrap { background: var(--bg); border-radius: 6px; height: 6px; overflow: hidden; margin-bottom: 8px; }
-#prog-bar { height: 100%; background: var(--blue); border-radius: 6px; width: 0%; transition: width .15s; }
-#prog-msg { font-size: 12px; color: var(--muted); min-height: 18px; }
+#prog-wrap { background: var(--bg); border-radius: 6px; height: 5px; overflow: hidden; margin-bottom: 6px; }
+#prog-bar { height: 100%; background: var(--blue); width: 0%; border-radius: 6px; transition: width .12s; }
+#prog-msg { font-size: 12px; color: var(--muted); min-height: 16px; margin-bottom: 16px; }
 
 /* Buttons */
 .btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600;
-  cursor: pointer; border: none; transition: background .15s; width: 100%;
-  justify-content: center; margin-top: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px 20px; border-radius: 8px;
+  font-size: 15px; font-weight: 600; cursor: pointer; border: none;
+  transition: background .15s; margin-bottom: 10px;
 }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-.btn-blue { background: var(--blue); color: #fff; }
+.btn:disabled { opacity: .38; cursor: not-allowed; }
+.btn-blue   { background: var(--blue); color: #fff; }
 .btn-blue:hover:not(:disabled) { background: var(--blue-h); }
-.btn-green { background: #16a34a; color: #fff; }
-.btn-green:hover:not(:disabled) { background: #15803d; }
-.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 8px 16px; margin-top: 10px; }
+.btn-print  { background: #16a34a; color: #fff; }
+.btn-print:hover:not(:disabled) { background: #15803d; }
+.btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 8px 16px; }
 .btn-ghost:hover { border-color: #3b82f6; color: #3b82f6; }
 
-/* Result */
-#result-box {
-  display: none; margin-top: 14px;
-  background: rgba(22,163,74,.1); border: 1px solid rgba(34,197,94,.25);
-  border-radius: 8px; padding: 12px 16px;
-  font-size: 13px; color: #86efac; line-height: 1.5;
+/* Result info */
+#result-info {
+  display: none; margin-bottom: 14px;
+  background: rgba(22,163,74,.1); border: 1px solid rgba(34,197,94,.22);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #86efac;
 }
 
-/* Preview strip */
-#preview-strip {
-  display: none; width: 100%; max-width: 520px; margin-top: 20px;
+/* Preview grid (screen only) */
+#preview-wrap { display: none; width: 100%; max-width: 500px; margin-top: 22px; }
+#preview-wrap h2 { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+#preview-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
 }
-#preview-strip .strip-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; text-align: center; }
-#strip-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px;
+.prev-strip {
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  background: #fff; display: flex; aspect-ratio: 80 / 25;
 }
-.strip-item { border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
-.strip-item img { display: block; width: 100%; height: auto; }
-.strip-item .n { font-size: 10px; color: var(--muted); text-align: center; padding: 2px; }
+.prev-cell {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 2px;
+}
+.prev-cell img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.prev-cell.empty { background: #f9f9f9; }
+.strip-n { font-size: 10px; color: var(--muted); text-align: center; padding: 2px 0; }
 
-footer { margin-top: 48px; font-size: 12px; color: #475569; text-align: center; }
+/* Print area (hidden on screen, shown when printing) */
+#print-area { display: none; }
+
+footer { margin-top: 44px; font-size: 11px; color: #475569; text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="logo">M</div>
 <h1>Etiquetas FULL</h1>
-<p class="sub">Shopee FULL · A4 → Térmicas duplas 40×25mm</p>
+<p class="sub">Shopee FULL · Imprimir direto na térmica · duplas 40×25mm</p>
 
+<!-- UPLOAD -->
 <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3">
+  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3">
     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
     <polyline points="14 2 14 8 20 8"/>
     <line x1="12" y1="18" x2="12" y2="12"/>
     <polyline points="9 15 12 12 15 15"/>
   </svg>
   <div class="cta">Arraste o PDF aqui ou clique para selecionar</div>
-  <div class="hint">Arquivo Print_Barcode do Shopee FULL (A4, grade 4×6)</div>
+  <div class="hint">Print_Barcode do Shopee FULL (A4, grade 4 × 6 etiquetas)</div>
 </div>
 <input type="file" id="file-input" accept=".pdf">
 
-<div id="status-card">
-  <div class="file-row">
-    <div class="file-icon">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+<!-- STATUS / CONTROLES -->
+<div id="status">
+  <div class="frow">
+    <div class="ficon">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
       </svg>
     </div>
     <div>
-      <div class="file-name" id="fn">—</div>
-      <div class="file-meta" id="fm">—</div>
+      <div class="fname" id="fn">—</div>
+      <div class="fmeta" id="fm">—</div>
     </div>
   </div>
 
   <div id="prog-wrap"><div id="prog-bar"></div></div>
   <div id="prog-msg"></div>
 
-  <button class="btn btn-blue" id="btn-convert" onclick="convert()" disabled>
+  <div id="result-info"></div>
+
+  <button class="btn btn-blue" id="btn-proc" onclick="processPDF()" disabled>
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
     </svg>
-    Converter para térmica
+    Identificar etiquetas
   </button>
 
-  <button class="btn btn-green" id="btn-dl" onclick="download()" disabled>
+  <button class="btn btn-print" id="btn-print" onclick="printLabels()" disabled>
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-      <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      <polyline points="6 9 6 2 18 2 18 9"/>
+      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
     </svg>
-    Baixar PDF térmico
+    Imprimir na térmica
   </button>
 
-  <div id="result-box"></div>
-
-  <button class="btn btn-ghost" onclick="reset()">Novo arquivo</button>
+  <button class="btn btn-ghost" onclick="resetAll()">Novo arquivo</button>
 </div>
 
-<div id="preview-strip">
-  <div class="strip-title" id="strip-title">—</div>
-  <div id="strip-grid"></div>
+<!-- PREVIEW (tela) -->
+<div id="preview-wrap">
+  <h2 id="preview-title">—</h2>
+  <div id="preview-grid"></div>
 </div>
 
-<footer>Processamento local · nenhum arquivo enviado para servidores · Montenegro Indústria</footer>
+<!-- ÁREA DE IMPRESSÃO (invisível na tela, usada pelo browser ao imprimir) -->
+<div id="print-area"></div>
+
+<footer>Processamento local · nenhum dado enviado para servidores · Montenegro Indústria</footer>
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ── Hardcoded config for Shopee FULL Print_Barcode A4 ──────────────────────
+// ── Config hardcoded para Print_Barcode FULL ───────────────────────────────
 const CFG = {
-  cols:    4,      // 4 colunas de etiquetas no A4
-  rows:    6,      // 6 linhas por página (última página pode ter menos)
-  marginV: 4,      // mm topo/base
-  marginH: 3,      // mm esq/dir
-  dpi:     200,    // resolução de extração
-  outW:    80,     // mm largura da tira (dupla)
-  outH:    25,     // mm altura
+  cols:    4,    // colunas de etiquetas no A4
+  rows:    6,    // linhas de etiquetas no A4
+  marginV: 4,    // mm margem topo/base
+  marginH: 3,    // mm margem esq/dir
+  dpi:     200,
 };
 
-let pdfDoc = null, resultDoc = null, previewImages = [];
+let pdfDoc = null;
+let labelImages = [];   // todas as etiquetas extraídas (dataURL)
 
 // ── Drag & drop ────────────────────────────────────────────────────────────
 const dz = document.getElementById('drop-zone');
@@ -183,42 +234,38 @@ dz.addEventListener('dragleave', () => dz.classList.remove('over'));
 dz.addEventListener('drop', e => {
   e.preventDefault(); dz.classList.remove('over');
   const f = e.dataTransfer.files[0];
-  if (f?.type === 'application/pdf') load(f);
-  else alert('Por favor selecione um arquivo PDF.');
+  if (f?.type === 'application/pdf') loadPDF(f);
+  else alert('Selecione um arquivo PDF.');
 });
 document.getElementById('file-input').addEventListener('change', e => {
-  if (e.target.files[0]) load(e.target.files[0]);
+  if (e.target.files[0]) loadPDF(e.target.files[0]);
 });
 
-// ── Load PDF ───────────────────────────────────────────────────────────────
-async function load(file) {
-  reset(false);
+// ── Carregar PDF ───────────────────────────────────────────────────────────
+async function loadPDF(file) {
+  resetAll(false);
   const buf = await file.arrayBuffer();
   pdfDoc = await pdfjsLib.getDocument(buf).promise;
 
   document.getElementById('fn').textContent = file.name;
   document.getElementById('fm').textContent =
-    `${pdfDoc.numPages} página(s) · até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
-  document.getElementById('status-card').style.display = '';
-  document.getElementById('btn-convert').disabled = false;
-  setMsg('Pronto para converter.');
+    `${pdfDoc.numPages} página(s) · estimativa: até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
+  document.getElementById('status').style.display = '';
+  document.getElementById('btn-proc').disabled = false;
+  setMsg('Arquivo carregado. Clique em "Identificar etiquetas".');
 }
 
-// ── Convert ────────────────────────────────────────────────────────────────
-async function convert() {
+// ── Processar: extrair etiquetas da grade 4×6 ─────────────────────────────
+async function processPDF() {
   if (!pdfDoc) return;
-  document.getElementById('btn-convert').disabled = true;
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [CFG.outW, CFG.outH], compress: true });
+  document.getElementById('btn-proc').disabled = true;
+  labelImages = [];
 
   const pxPerMm = CFG.dpi / 25.4;
   const total   = pdfDoc.numPages;
-  let   strips  = [];   // all individual label dataURLs
 
-  // ── 1. Extract individual labels from every page ─────────────────────────
   for (let n = 1; n <= total; n++) {
-    setProgress((n - 1) / total * 60, `Lendo página ${n} de ${total}…`);
+    setProgress((n - 1) / total * 95, `Lendo página ${n} de ${total}…`);
 
     const page = await pdfDoc.getPage(n);
     const vp   = page.getViewport({ scale: CFG.dpi / 72 });
@@ -230,12 +277,12 @@ async function convert() {
     px.fillRect(0, 0, pc.width, pc.height);
     await page.render({ canvasContext: px, viewport: vp }).promise;
 
-    const mH   = CFG.marginH * pxPerMm;
-    const mV   = CFG.marginV * pxPerMm;
-    const aW   = pc.width  - 2 * mH;
-    const aH   = pc.height - 2 * mV;
-    const cW   = aW / CFG.cols;
-    const cH   = aH / CFG.rows;
+    const mH = CFG.marginH * pxPerMm;
+    const mV = CFG.marginV * pxPerMm;
+    const aW = pc.width  - 2 * mH;
+    const aH = pc.height - 2 * mV;
+    const cW = aW / CFG.cols;
+    const cH = aH / CFG.rows;
 
     for (let r = 0; r < CFG.rows; r++) {
       for (let c = 0; c < CFG.cols; c++) {
@@ -246,71 +293,105 @@ async function convert() {
         lx.fillStyle = '#ffffff';
         lx.fillRect(0, 0, lc.width, lc.height);
         lx.drawImage(pc, mH + c * cW, mV + r * cH, cW, cH, 0, 0, lc.width, lc.height);
-
-        if (!isBlank(lc)) strips.push(lc.toDataURL('image/jpeg', 0.92));
+        if (!isBlank(lc)) labelImages.push(lc.toDataURL('image/jpeg', 0.93));
       }
     }
   }
 
-  // ── 2. Pair labels into duplas (side by side on 80×25mm) ─────────────────
-  setProgress(70, `Montando ${strips.length} etiquetas em duplas…`);
+  setProgress(100, '');
+  buildPrintArea();
+  buildPreview();
 
-  previewImages = [];
-  let firstPage = true;
+  const nStrips = Math.ceil(labelImages.length / 2);
+  document.getElementById('result-info').style.display = '';
+  document.getElementById('result-info').innerHTML =
+    `✅ <strong>${labelImages.length} etiquetas</strong> identificadas → <strong>${nStrips} tiras duplas</strong> · Clique em "Imprimir na térmica"`;
+  document.getElementById('btn-print').disabled = false;
+}
 
-  // output canvas dimensions at CFG.dpi
-  const outWpx = Math.round(CFG.outW * pxPerMm);
-  const outHpx = Math.round(CFG.outH * pxPerMm);
-  const halfW  = Math.round(outWpx / 2);
+// ── Montar área de impressão: cada strip = 1 página de 80×25mm ────────────
+function buildPrintArea() {
+  const area = document.getElementById('print-area');
+  area.innerHTML = '';
 
-  for (let i = 0; i < strips.length; i += 2) {
-    const dc = document.createElement('canvas');
-    dc.width  = outWpx; dc.height = outHpx;
-    const dx  = dc.getContext('2d');
-    dx.fillStyle = '#ffffff';
-    dx.fillRect(0, 0, outWpx, outHpx);
+  for (let i = 0; i < labelImages.length; i += 2) {
+    const strip = document.createElement('div');
+    strip.className = 'strip';
 
-    await drawImg(dx, strips[i],     0,     0, halfW, outHpx);
-    if (i + 1 < strips.length)
-      await drawImg(dx, strips[i+1], halfW, 0, halfW, outHpx);
+    // Célula esquerda
+    const cellL = document.createElement('div');
+    cellL.className = 'cell';
+    const imgL = document.createElement('img');
+    imgL.src = labelImages[i];
+    cellL.appendChild(imgL);
+    strip.appendChild(cellL);
 
-    // thin divider line between the two labels
-    dx.strokeStyle = '#cccccc';
-    dx.lineWidth   = 1;
-    dx.beginPath();
-    dx.moveTo(halfW, 0);
-    dx.lineTo(halfW, outHpx);
-    dx.stroke();
+    // Célula direita (pode ser vazia na última tira ímpar)
+    const cellR = document.createElement('div');
+    if (i + 1 < labelImages.length) {
+      cellR.className = 'cell';
+      const imgR = document.createElement('img');
+      imgR.src = labelImages[i + 1];
+      cellR.appendChild(imgR);
+    } else {
+      cellR.className = 'cell cell-empty';
+    }
+    strip.appendChild(cellR);
 
-    const dataUrl = dc.toDataURL('image/jpeg', 0.93);
-    if (!firstPage) doc.addPage([CFG.outW, CFG.outH], 'landscape');
-    firstPage = false;
-    doc.addImage(dataUrl, 'JPEG', 0, 0, CFG.outW, CFG.outH, '', 'FAST');
-    previewImages.push(dataUrl);
+    area.appendChild(strip);
+  }
+}
+
+// ── Preview na tela ────────────────────────────────────────────────────────
+function buildPreview() {
+  const grid  = document.getElementById('preview-grid');
+  const nStrips = Math.ceil(labelImages.length / 2);
+  grid.innerHTML = '';
+  document.getElementById('preview-title').textContent =
+    `Pré-visualização · ${nStrips} tiras duplas (cada tira = 1 impressão 80×25mm)`;
+
+  for (let i = 0; i < labelImages.length; i += 2) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;';
+
+    const strip = document.createElement('div');
+    strip.className = 'prev-strip';
+
+    const cellL = document.createElement('div');
+    cellL.className = 'prev-cell';
+    const imgL = document.createElement('img'); imgL.src = labelImages[i];
+    cellL.appendChild(imgL);
+    strip.appendChild(cellL);
+
+    const cellR = document.createElement('div');
+    if (i + 1 < labelImages.length) {
+      cellR.className = 'prev-cell';
+      const imgR = document.createElement('img'); imgR.src = labelImages[i + 1];
+      cellR.appendChild(imgR);
+    } else {
+      cellR.className = 'prev-cell empty';
+    }
+    strip.appendChild(cellR);
+
+    const n = document.createElement('div');
+    n.className = 'strip-n';
+    n.textContent = `Tira ${Math.floor(i/2) + 1}`;
+
+    wrap.appendChild(strip);
+    wrap.appendChild(n);
+    grid.appendChild(wrap);
   }
 
-  setProgress(100, '');
-  resultDoc = doc;
-
-  const nStrips = previewImages.length;
-  document.getElementById('result-box').style.display = '';
-  document.getElementById('result-box').innerHTML =
-    `✅ <strong>${strips.length} etiquetas</strong> → <strong>${nStrips} tiras duplas</strong> de 80×25mm · Pronto para imprimir na ELGIN.`;
-  document.getElementById('btn-dl').disabled = false;
-
-  renderPreview(nStrips);
+  document.getElementById('preview-wrap').style.display = '';
 }
 
-// ── Draw image (async helper) ──────────────────────────────────────────────
-function drawImg(ctx, src, x, y, w, h) {
-  return new Promise(res => {
-    const img = new Image();
-    img.onload = () => { ctx.drawImage(img, x, y, w, h); res(); };
-    img.src = src;
-  });
+// ── Imprimir ───────────────────────────────────────────────────────────────
+function printLabels() {
+  if (!labelImages.length) return;
+  window.print();
 }
 
-// ── Blank detection ────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────
 function isBlank(canvas) {
   const d = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
   let dark = 0;
@@ -318,57 +399,27 @@ function isBlank(canvas) {
     if ((d[i] + d[i+1] + d[i+2]) / 3 < 200) dark++;
   return dark / (canvas.width * canvas.height) < 0.004;
 }
-
-// ── Preview ────────────────────────────────────────────────────────────────
-function renderPreview(total) {
-  const grid = document.getElementById('strip-grid');
-  grid.innerHTML = '';
-  document.getElementById('strip-title').textContent = `${total} tiras duplas geradas (prévia)`;
-  document.getElementById('preview-strip').style.display = '';
-  previewImages.slice(0, 12).forEach((src, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'strip-item';
-    const img = document.createElement('img'); img.src = src;
-    const n   = document.createElement('div'); n.className = 'n'; n.textContent = `#${i+1}`;
-    wrap.appendChild(img); wrap.appendChild(n);
-    grid.appendChild(wrap);
-  });
-  if (total > 12) {
-    const more = document.createElement('div');
-    more.className = 'strip-item';
-    more.style.cssText = 'display:grid;place-items:center;min-height:50px;font-size:12px;color:var(--muted)';
-    more.textContent = `+${total - 12} mais`;
-    grid.appendChild(more);
-  }
-}
-
-// ── Download ───────────────────────────────────────────────────────────────
-function download() {
-  if (!resultDoc) return;
-  resultDoc.save(`etiquetas_full_${previewImages.length}tiras.pdf`);
-}
-
-// ── Progress ───────────────────────────────────────────────────────────────
 function setProgress(pct, msg) {
   document.getElementById('prog-bar').style.width = pct + '%';
-  document.getElementById('prog-msg').textContent  = msg;
+  document.getElementById('prog-msg').textContent = msg;
 }
 function setMsg(msg) { document.getElementById('prog-msg').textContent = msg; }
 
-// ── Reset ──────────────────────────────────────────────────────────────────
-function reset(full = true) {
+function resetAll(full = true) {
   if (full) {
     pdfDoc = null;
     document.getElementById('file-input').value = '';
-    document.getElementById('status-card').style.display  = 'none';
-    document.getElementById('preview-strip').style.display = 'none';
+    document.getElementById('status').style.display       = 'none';
+    document.getElementById('preview-wrap').style.display = 'none';
   }
-  resultDoc = null; previewImages = [];
-  document.getElementById('btn-convert').disabled = true;
-  document.getElementById('btn-dl').disabled      = true;
-  document.getElementById('result-box').style.display = 'none';
+  labelImages = [];
+  document.getElementById('btn-proc').disabled  = true;
+  document.getElementById('btn-print').disabled = true;
+  document.getElementById('result-info').style.display = 'none';
   document.getElementById('prog-bar').style.width = '0%';
   document.getElementById('prog-msg').textContent = '';
+  document.getElementById('print-area').innerHTML = '';
+  document.getElementById('preview-grid').innerHTML = '';
 }
 </script>
 </body>
