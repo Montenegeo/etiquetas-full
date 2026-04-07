@@ -138,10 +138,10 @@
       <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Presets rápidos:</div>
       <div class="presets">
         <button class="preset-btn active" id="preset-full1" onclick="applyPreset('full1')">
-          FULL — 1 por página (40×25)
+          FULL Barcode — grade 4×6 (40×25mm)
         </button>
         <button class="preset-btn" id="preset-full2" onclick="applyPreset('full2')">
-          FULL — 2 por página (duplas 40×25)
+          FULL Duplas — 2 por tira (80×25mm)
         </button>
         <button class="preset-btn" id="preset-custom" onclick="applyPreset('custom')">
           Personalizado
@@ -220,8 +220,8 @@
     </div>
 
     <div id="preset-hint" style="margin-top:12px;" class="info-box warn">
-      <strong>Preset ativo: FULL — 1 etiqueta por página A4 → 40×25mm</strong><br>
-      Cada página do PDF vira 1 etiqueta 40×25mm. Se o resultado sair cortado, tente o preset "2 por página".
+      <strong>Preset: FULL Barcode — grade 4×6 → 40×25mm individual</strong><br>
+      PDF A4 com 4 colunas × 6 linhas (24 etiquetas/página). Extrai cada etiqueta em 40×25mm. Formato: <em>Print_Barcode_XXXX.pdf</em> do Shopee FULL.
     </div>
   </div>
 
@@ -281,21 +281,22 @@ let mode = 'single';  // 'single' | 'grid'
 // ── Presets ────────────────────────────────────────────────────────────────
 const PRESETS = {
   full1: {
-    mode: 'single',
+    mode: 'grid', cols: 4, rows: 6,
+    marginV: 4, marginH: 3,
     outW: 40, outH: 25,
     orient: 'landscape',
-    hint: '<strong>Preset: FULL — 1 etiqueta por página A4 → 40×25mm</strong><br>Cada página do PDF vira 1 etiqueta 40×25mm. Ideal para a maioria dos PDFs do Shopee FULL.'
+    hint: '<strong>Preset: FULL Barcode — grade 4×6 → 40×25mm individual</strong><br>PDF A4 com 4 colunas × 6 linhas (24 etiquetas/página). Extrai cada etiqueta em 40×25mm. Formato: <em>Print_Barcode_XXXX.pdf</em> do Shopee FULL.'
   },
   full2: {
-    mode: 'grid', cols: 2, rows: 1,
-    marginV: 5, marginH: 5,
-    outW: 40, outH: 25,
+    mode: 'grid', cols: 2, rows: 6,
+    marginV: 4, marginH: 3,
+    outW: 80, outH: 25,
     orient: 'landscape',
-    hint: '<strong>Preset: FULL — 2 etiquetas por página (duplas) → 40×25mm cada</strong><br>A4 com 2 colunas de etiquetas. Cada metade vira 1 etiqueta 40×25mm.'
+    hint: '<strong>Preset: FULL Duplas — 2 por tira → 80×25mm</strong><br>Agrupa pares lado a lado. Cada página = 1 tira 80×25mm com 2 etiquetas. Use se a impressora está configurada em 80mm de largura.'
   },
   custom: {
-    mode: 'grid', cols: 2, rows: 1,
-    marginV: 5, marginH: 5,
+    mode: 'grid', cols: 4, rows: 6,
+    marginV: 4, marginH: 3,
     outW: 40, outH: 25,
     orient: 'landscape',
     hint: null
