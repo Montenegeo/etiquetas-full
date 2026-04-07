@@ -4,192 +4,135 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Etiquetas FULL · Montenegro</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-
+<script src="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
 <style>
-/* ── PRINT STYLES (o que a impressora vê) ──────────────────────────────── */
+/* ── PRINT ──────────────────────────────────────────────────────────────── */
 @media print {
-  @page {
-    size: 80mm 25mm;
-    margin: 0;
-  }
+  @page { size: 80mm 25mm; margin: 0; }
   body > *:not(#print-area) { display: none !important; }
-  #print-area {
-    display: block !important;
-    visibility: visible !important;
-  }
-  .strip {
-    width: 80mm;
-    height: 25mm;
-    display: flex;
-    page-break-after: always;
-    break-after: page;
-    overflow: hidden;
-  }
-  .cell {
-    width: 40mm;
-    height: 25mm;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .cell img {
-    max-width: 38mm;
-    max-height: 23mm;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
-  }
-  .cell-empty { background: #fff; }
+  #print-area { display: block !important; }
+  .strip { width: 80mm; height: 25mm; display: flex; page-break-after: always; break-after: page; overflow: hidden; }
+  .cell { width: 40mm; height: 25mm; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cell img { max-width: 38mm; max-height: 23mm; object-fit: contain; }
 }
 
-/* ── SCREEN STYLES ─────────────────────────────────────────────────────── */
+/* ── SCREEN ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #0f172a; --surface: #1e293b; --border: #334155;
-  --blue: #2563eb; --blue-h: #1d4ed8; --text: #e2e8f0; --muted: #94a3b8;
-}
+:root { --bg:#0f172a; --surface:#1e293b; --border:#334155; --blue:#2563eb; --text:#e2e8f0; --muted:#94a3b8; }
 
 body {
   background: var(--bg); color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; padding: 44px 20px 64px;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  padding: 44px 20px 80px;
 }
 
-.logo {
-  width: 46px; height: 46px; background: var(--blue); border-radius: 12px;
-  display: grid; place-items: center; font-weight: 900; font-size: 21px;
-  color: #fff; margin-bottom: 14px; flex-shrink: 0;
-}
-h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
-.sub { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
+.logo { width:46px;height:46px;background:var(--blue);border-radius:12px;display:grid;place-items:center;font-weight:900;font-size:21px;color:#fff;margin-bottom:14px; }
+h1 { font-size:21px;font-weight:700;margin-bottom:4px; }
+.sub { font-size:13px;color:var(--muted);margin-bottom:36px; }
 
-/* Upload */
-#drop-zone {
-  width: 100%; max-width: 500px;
-  border: 2px dashed var(--border); border-radius: 14px;
-  padding: 52px 28px; text-align: center; cursor: pointer;
-  transition: border-color .2s, background .2s; background: var(--surface);
+/* Upload box */
+.upload-box {
+  width:100%;max-width:500px;
+  background:var(--surface);border:2px dashed var(--border);border-radius:14px;
+  padding:40px 28px;text-align:center;
+  transition:border-color .2s;
 }
-#drop-zone.over, #drop-zone:hover { border-color: #3b82f6; background: rgba(37,99,235,.07); }
-#drop-zone svg { display: block; margin: 0 auto 14px; opacity: .45; }
-#drop-zone .cta { font-size: 16px; font-weight: 600; color: #3b82f6; }
-#drop-zone .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
-#file-input { display: none; }
+.upload-box.dragover { border-color:#3b82f6;background:rgba(37,99,235,.07); }
+.upload-box svg { display:block;margin:0 auto 16px;opacity:.4; }
+.upload-box p { font-size:14px;color:var(--muted);margin-bottom:20px; }
 
-/* Status */
-#status {
-  display: none; width: 100%; max-width: 500px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 24px; margin-top: 18px;
+/* File button — VISIBLE input styled as button */
+.file-btn-wrap { position:relative;display:inline-block; }
+.file-btn-wrap input[type=file] {
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
 }
-.frow { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-.ficon { width: 34px; height: 34px; background: rgba(37,99,235,.15); border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
-.fname { font-size: 14px; font-weight: 600; }
-.fmeta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.file-btn {
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--blue);color:#fff;
+  padding:11px 24px;border-radius:8px;font-size:15px;font-weight:600;
+  cursor:pointer;border:none;pointer-events:none;
+}
 
-#prog-wrap { background: var(--bg); border-radius: 6px; height: 5px; overflow: hidden; margin-bottom: 6px; }
-#prog-bar { height: 100%; background: var(--blue); width: 0%; border-radius: 6px; transition: width .12s; }
-#prog-msg { font-size: 12px; color: var(--muted); min-height: 16px; margin-bottom: 16px; }
+/* Card */
+.card { width:100%;max-width:500px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-top:18px; }
+
+/* Progress */
+.prog-wrap { background:var(--bg);border-radius:6px;height:5px;overflow:hidden;margin-bottom:6px; }
+.prog-bar  { height:100%;background:var(--blue);width:0%;border-radius:6px;transition:width .12s; }
+.prog-msg  { font-size:12px;color:var(--muted);min-height:16px;margin-bottom:14px; }
 
 /* Buttons */
-.btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 12px 20px; border-radius: 8px;
-  font-size: 15px; font-weight: 600; cursor: pointer; border: none;
-  transition: background .15s; margin-bottom: 10px;
-}
-.btn:disabled { opacity: .38; cursor: not-allowed; }
-.btn-blue   { background: var(--blue); color: #fff; }
-.btn-blue:hover:not(:disabled) { background: var(--blue-h); }
-.btn-print  { background: #16a34a; color: #fff; }
-.btn-print:hover:not(:disabled) { background: #15803d; }
-.btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 8px 16px; }
-.btn-ghost:hover { border-color: #3b82f6; color: #3b82f6; }
+.btn { display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:background .15s;margin-bottom:10px; }
+.btn:disabled { opacity:.38;cursor:not-allowed; }
+.btn-blue  { background:var(--blue);color:#fff; }
+.btn-blue:hover:not(:disabled)  { background:#1d4ed8; }
+.btn-green { background:#16a34a;color:#fff; }
+.btn-green:hover:not(:disabled) { background:#15803d; }
+.btn-ghost { background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:8px; }
 
-/* Result info */
-#result-info {
-  display: none; margin-bottom: 14px;
-  background: rgba(22,163,74,.1); border: 1px solid rgba(34,197,94,.22);
-  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #86efac;
-}
+/* Alerts */
+.alert { border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px; }
+.alert-ok  { background:rgba(22,163,74,.1);border:1px solid rgba(34,197,94,.22);color:#86efac; }
+.alert-err { background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5; }
 
-/* Preview grid (screen only) */
-#preview-wrap { display: none; width: 100%; max-width: 500px; margin-top: 22px; }
-#preview-wrap h2 { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 10px; }
-#preview-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
-}
-.prev-strip {
-  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
-  background: #fff; display: flex; aspect-ratio: 80 / 25;
-}
-.prev-cell {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 2px;
-}
-.prev-cell img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.prev-cell.empty { background: #f9f9f9; }
-.strip-n { font-size: 10px; color: var(--muted); text-align: center; padding: 2px 0; }
+/* Preview */
+.preview-grid { display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:12px; }
+.prev-strip { border:1px solid var(--border);border-radius:5px;overflow:hidden;background:#fff;display:flex;aspect-ratio:80/25; }
+.prev-cell  { flex:1;display:flex;align-items:center;justify-content:center;padding:2px; }
+.prev-cell img { max-width:100%;max-height:100%;object-fit:contain; }
+.prev-n { font-size:10px;color:var(--muted);text-align:center;margin-top:2px; }
 
-/* Print area (hidden on screen, shown when printing) */
-#print-area { display: none; }
-
-footer { margin-top: 44px; font-size: 11px; color: #475569; text-align: center; }
+#print-area { display:none; }
+footer { margin-top:44px;font-size:11px;color:#475569;text-align:center; }
 </style>
 </head>
 <body>
 
 <div class="logo">M</div>
 <h1>Etiquetas FULL</h1>
-<p class="sub">Shopee FULL · Imprimir direto na térmica · duplas 40×25mm</p>
+<p class="sub">Shopee FULL · Impressão direta · duplas 40×25mm</p>
 
 <!-- UPLOAD -->
-<label id="drop-zone" for="file-input">
-  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3">
+<div class="upload-box" id="drop-zone">
+  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3">
     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
     <polyline points="14 2 14 8 20 8"/>
     <line x1="12" y1="18" x2="12" y2="12"/>
     <polyline points="9 15 12 12 15 15"/>
   </svg>
-  <div class="cta">Arraste o PDF aqui ou clique para selecionar</div>
-  <div class="hint">Print_Barcode do Shopee FULL (A4, grade 4 × 6 etiquetas)</div>
-</label>
-<input type="file" id="file-input" accept=".pdf" style="display:none">
-
-<!-- STATUS / CONTROLES -->
-<div id="status">
-  <div class="frow">
-    <div class="ficon">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+  <p>Arraste o PDF aqui ou clique no botão abaixo</p>
+  <div class="file-btn-wrap">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" onchange="onFileChange(event)">
+    <div class="file-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
       </svg>
-    </div>
-    <div>
-      <div class="fname" id="fn">—</div>
-      <div class="fmeta" id="fm">—</div>
+      Selecionar PDF
     </div>
   </div>
+</div>
 
-  <div id="prog-wrap"><div id="prog-bar"></div></div>
-  <div id="prog-msg"></div>
+<!-- STATUS -->
+<div class="card" id="card-status" style="display:none">
+  <div style="font-size:14px;font-weight:600;margin-bottom:4px" id="fn">—</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="fm">—</div>
 
-  <div id="result-info"></div>
+  <div class="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+  <div class="prog-msg" id="prog-msg"></div>
+
+  <div id="alert-box" style="display:none"></div>
 
   <button class="btn btn-blue" id="btn-proc" onclick="processPDF()" disabled>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
     Identificar etiquetas
   </button>
 
-  <button class="btn btn-print" id="btn-print" onclick="printLabels()" disabled>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <button class="btn btn-green" id="btn-print" onclick="window.print()" disabled>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polyline points="6 9 6 2 18 2 18 9"/>
       <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
       <rect x="6" y="14" width="12" height="8"/>
@@ -198,244 +141,198 @@ footer { margin-top: 44px; font-size: 11px; color: #475569; text-align: center; 
   </button>
 
   <button class="btn btn-ghost" onclick="resetAll()">Novo arquivo</button>
+
+  <div id="preview-wrap" style="display:none">
+    <div style="font-size:12px;color:var(--muted);margin-top:16px;margin-bottom:8px;text-align:center" id="preview-title"></div>
+    <div class="preview-grid" id="preview-grid"></div>
+  </div>
 </div>
 
-<!-- PREVIEW (tela) -->
-<div id="preview-wrap">
-  <h2 id="preview-title">—</h2>
-  <div id="preview-grid"></div>
-</div>
-
-<!-- ÁREA DE IMPRESSÃO (invisível na tela, usada pelo browser ao imprimir) -->
 <div id="print-area"></div>
 
 <footer>Processamento local · nenhum dado enviado para servidores · Montenegro Indústria</footer>
 
 <script>
-// fallback worker inline se CDN falhar
-try {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-} catch(e) { console.error('pdfjs init', e); }
+// ── PDF.js setup ───────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+  }
+});
 
-// ── Config hardcoded para Print_Barcode FULL ───────────────────────────────
-const CFG = {
-  cols:    4,    // colunas de etiquetas no A4
-  rows:    6,    // linhas de etiquetas no A4
-  marginV: 4,    // mm margem topo/base
-  marginH: 3,    // mm margem esq/dir
-  dpi:     200,
-};
-
-let pdfDoc = null;
-let labelImages = [];   // todas as etiquetas extraídas (dataURL)
+const CFG = { cols:4, rows:6, marginV:4, marginH:3, dpi:200 };
+let pdfDoc = null, labelImages = [];
 
 // ── Drag & drop ────────────────────────────────────────────────────────────
 const dz = document.getElementById('drop-zone');
-dz.addEventListener('dragover',  e => { e.preventDefault(); e.stopPropagation(); dz.classList.add('over'); });
-dz.addEventListener('dragleave', e => { e.stopPropagation(); dz.classList.remove('over'); });
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
 dz.addEventListener('drop', e => {
-  e.preventDefault(); e.stopPropagation(); dz.classList.remove('over');
+  e.preventDefault(); dz.classList.remove('dragover');
   const f = e.dataTransfer.files[0];
-  if (f?.type === 'application/pdf') loadPDF(f);
-  else alert('Selecione um arquivo PDF.');
-});
-document.getElementById('file-input').addEventListener('change', e => {
-  if (e.target.files[0]) loadPDF(e.target.files[0]);
+  if (f) handleFile(f); else showAlert('Nenhum arquivo detectado.', 'err');
 });
 
-// ── Carregar PDF ───────────────────────────────────────────────────────────
-async function loadPDF(file) {
+// ── File input ─────────────────────────────────────────────────────────────
+function onFileChange(e) {
+  const f = e.target.files[0];
+  if (f) handleFile(f);
+}
+
+// ── Load ───────────────────────────────────────────────────────────────────
+async function handleFile(file) {
   resetAll(false);
-  showErr('');
   try {
-    if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js não carregou. Verifique sua conexão e recarregue a página.');
+    if (typeof pdfjsLib === 'undefined')
+      throw new Error('PDF.js não carregou. Verifique sua conexão e recarregue.');
+
     const buf = await file.arrayBuffer();
-    pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+    pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+
     document.getElementById('fn').textContent = file.name;
     document.getElementById('fm').textContent =
-      `${pdfDoc.numPages} página(s) · estimativa: até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
-    document.getElementById('status').style.display = '';
+      `${pdfDoc.numPages} página(s)  ·  até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
+    document.getElementById('card-status').style.display = '';
     document.getElementById('btn-proc').disabled = false;
-    setMsg('Arquivo carregado. Clique em "Identificar etiquetas".');
+    setMsg('Pronto. Clique em "Identificar etiquetas".');
   } catch(e) {
-    showErr('Erro ao abrir o PDF: ' + e.message);
+    showAlert('Erro: ' + e.message, 'err');
+    document.getElementById('card-status').style.display = '';
     console.error(e);
   }
 }
 
-// ── Processar: extrair etiquetas da grade 4×6 ─────────────────────────────
+// ── Process ────────────────────────────────────────────────────────────────
 async function processPDF() {
   if (!pdfDoc) return;
   document.getElementById('btn-proc').disabled = true;
   labelImages = [];
 
-  const pxPerMm = CFG.dpi / 25.4;
-  const total   = pdfDoc.numPages;
+  try {
+    const pxPerMm = CFG.dpi / 25.4;
+    const total   = pdfDoc.numPages;
 
-  for (let n = 1; n <= total; n++) {
-    setProgress((n - 1) / total * 95, `Lendo página ${n} de ${total}…`);
+    for (let n = 1; n <= total; n++) {
+      setProgress((n-1)/total * 90, `Processando página ${n} de ${total}…`);
+      const page = await pdfDoc.getPage(n);
+      const vp   = page.getViewport({ scale: CFG.dpi / 72 });
 
-    const page = await pdfDoc.getPage(n);
-    const vp   = page.getViewport({ scale: CFG.dpi / 72 });
+      const pc = document.createElement('canvas');
+      pc.width = vp.width; pc.height = vp.height;
+      const px = pc.getContext('2d');
+      px.fillStyle = '#fff'; px.fillRect(0, 0, pc.width, pc.height);
+      await page.render({ canvasContext: px, viewport: vp }).promise;
 
-    const pc = document.createElement('canvas');
-    pc.width = vp.width; pc.height = vp.height;
-    const px = pc.getContext('2d');
-    px.fillStyle = '#ffffff';
-    px.fillRect(0, 0, pc.width, pc.height);
-    await page.render({ canvasContext: px, viewport: vp }).promise;
+      const mH = CFG.marginH * pxPerMm, mV = CFG.marginV * pxPerMm;
+      const cW = (pc.width  - 2*mH) / CFG.cols;
+      const cH = (pc.height - 2*mV) / CFG.rows;
 
-    const mH = CFG.marginH * pxPerMm;
-    const mV = CFG.marginV * pxPerMm;
-    const aW = pc.width  - 2 * mH;
-    const aH = pc.height - 2 * mV;
-    const cW = aW / CFG.cols;
-    const cH = aH / CFG.rows;
-
-    for (let r = 0; r < CFG.rows; r++) {
-      for (let c = 0; c < CFG.cols; c++) {
-        const lc = document.createElement('canvas');
-        lc.width  = Math.round(cW);
-        lc.height = Math.round(cH);
-        const lx  = lc.getContext('2d');
-        lx.fillStyle = '#ffffff';
-        lx.fillRect(0, 0, lc.width, lc.height);
-        lx.drawImage(pc, mH + c * cW, mV + r * cH, cW, cH, 0, 0, lc.width, lc.height);
-        if (!isBlank(lc)) labelImages.push(lc.toDataURL('image/jpeg', 0.93));
+      for (let r = 0; r < CFG.rows; r++) {
+        for (let c = 0; c < CFG.cols; c++) {
+          const lc = document.createElement('canvas');
+          lc.width = Math.round(cW); lc.height = Math.round(cH);
+          const lx = lc.getContext('2d');
+          lx.fillStyle = '#fff'; lx.fillRect(0, 0, lc.width, lc.height);
+          lx.drawImage(pc, mH+c*cW, mV+r*cH, cW, cH, 0, 0, lc.width, lc.height);
+          if (!isBlank(lc)) labelImages.push(lc.toDataURL('image/jpeg', 0.93));
+        }
       }
     }
+
+    setProgress(100, '');
+    buildPrintArea();
+    buildPreview();
+
+    const nStrips = Math.ceil(labelImages.length / 2);
+    showAlert(`✅ ${labelImages.length} etiquetas → ${nStrips} tiras duplas. Clique em "Imprimir".`, 'ok');
+    document.getElementById('btn-print').disabled = false;
+
+  } catch(e) {
+    showAlert('Erro ao processar: ' + e.message, 'err');
+    console.error(e);
+    document.getElementById('btn-proc').disabled = false;
   }
-
-  setProgress(100, '');
-  buildPrintArea();
-  buildPreview();
-
-  const nStrips = Math.ceil(labelImages.length / 2);
-  document.getElementById('result-info').style.display = '';
-  document.getElementById('result-info').innerHTML =
-    `✅ <strong>${labelImages.length} etiquetas</strong> identificadas → <strong>${nStrips} tiras duplas</strong> · Clique em "Imprimir na térmica"`;
-  document.getElementById('btn-print').disabled = false;
 }
 
-// ── Montar área de impressão: cada strip = 1 página de 80×25mm ────────────
+// ── Build print area ───────────────────────────────────────────────────────
 function buildPrintArea() {
   const area = document.getElementById('print-area');
   area.innerHTML = '';
-
   for (let i = 0; i < labelImages.length; i += 2) {
     const strip = document.createElement('div');
     strip.className = 'strip';
-
-    // Célula esquerda
-    const cellL = document.createElement('div');
-    cellL.className = 'cell';
-    const imgL = document.createElement('img');
-    imgL.src = labelImages[i];
-    cellL.appendChild(imgL);
-    strip.appendChild(cellL);
-
-    // Célula direita (pode ser vazia na última tira ímpar)
-    const cellR = document.createElement('div');
-    if (i + 1 < labelImages.length) {
-      cellR.className = 'cell';
-      const imgR = document.createElement('img');
-      imgR.src = labelImages[i + 1];
-      cellR.appendChild(imgR);
-    } else {
-      cellR.className = 'cell cell-empty';
-    }
-    strip.appendChild(cellR);
-
+    [0, 1].forEach(offset => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (labelImages[i + offset]) {
+        const img = document.createElement('img');
+        img.src = labelImages[i + offset];
+        cell.appendChild(img);
+      }
+      strip.appendChild(cell);
+    });
     area.appendChild(strip);
   }
 }
 
-// ── Preview na tela ────────────────────────────────────────────────────────
+// ── Preview ────────────────────────────────────────────────────────────────
 function buildPreview() {
-  const grid  = document.getElementById('preview-grid');
-  const nStrips = Math.ceil(labelImages.length / 2);
+  const grid = document.getElementById('preview-grid');
   grid.innerHTML = '';
-  document.getElementById('preview-title').textContent =
-    `Pré-visualização · ${nStrips} tiras duplas (cada tira = 1 impressão 80×25mm)`;
-
   for (let i = 0; i < labelImages.length; i += 2) {
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;';
-
     const strip = document.createElement('div');
     strip.className = 'prev-strip';
-
-    const cellL = document.createElement('div');
-    cellL.className = 'prev-cell';
-    const imgL = document.createElement('img'); imgL.src = labelImages[i];
-    cellL.appendChild(imgL);
-    strip.appendChild(cellL);
-
-    const cellR = document.createElement('div');
-    if (i + 1 < labelImages.length) {
-      cellR.className = 'prev-cell';
-      const imgR = document.createElement('img'); imgR.src = labelImages[i + 1];
-      cellR.appendChild(imgR);
-    } else {
-      cellR.className = 'prev-cell empty';
-    }
-    strip.appendChild(cellR);
-
+    [0, 1].forEach(offset => {
+      const cell = document.createElement('div');
+      cell.className = 'prev-cell';
+      if (labelImages[i + offset]) {
+        const img = document.createElement('img'); img.src = labelImages[i + offset];
+        cell.appendChild(img);
+      }
+      strip.appendChild(cell);
+    });
     const n = document.createElement('div');
-    n.className = 'strip-n';
-    n.textContent = `Tira ${Math.floor(i/2) + 1}`;
-
-    wrap.appendChild(strip);
-    wrap.appendChild(n);
+    n.className = 'prev-n';
+    n.textContent = `Tira ${Math.floor(i/2)+1}`;
+    wrap.appendChild(strip); wrap.appendChild(n);
     grid.appendChild(wrap);
   }
-
+  document.getElementById('preview-title').textContent =
+    `${Math.ceil(labelImages.length/2)} tiras · cada tira = 1 impressão de 80×25mm`;
   document.getElementById('preview-wrap').style.display = '';
 }
 
-// ── Imprimir ───────────────────────────────────────────────────────────────
-function printLabels() {
-  if (!labelImages.length) return;
-  window.print();
-}
-
 // ── Helpers ────────────────────────────────────────────────────────────────
-function isBlank(canvas) {
-  const d = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+function isBlank(c) {
+  const d = c.getContext('2d').getImageData(0,0,c.width,c.height).data;
   let dark = 0;
-  for (let i = 0; i < d.length; i += 4)
-    if ((d[i] + d[i+1] + d[i+2]) / 3 < 200) dark++;
-  return dark / (canvas.width * canvas.height) < 0.004;
+  for (let i=0;i<d.length;i+=4) if((d[i]+d[i+1]+d[i+2])/3<200) dark++;
+  return dark/(c.width*c.height) < 0.004;
 }
 function setProgress(pct, msg) {
   document.getElementById('prog-bar').style.width = pct + '%';
   document.getElementById('prog-msg').textContent = msg;
 }
-function setMsg(msg) { document.getElementById('prog-msg').textContent = msg; }
-function showErr(msg) {
-  let el = document.getElementById('err-box');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'err-box';
-    el.style.cssText = 'width:100%;max-width:500px;margin-top:14px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px 16px;font-size:13px;color:#fca5a5;display:none;';
-    document.querySelector('label#drop-zone').after(el);
-  }
+function setMsg(m) { document.getElementById('prog-msg').textContent = m; }
+function showAlert(msg, type) {
+  const el = document.getElementById('alert-box');
+  el.className = 'alert alert-' + type;
   el.textContent = msg;
-  el.style.display = msg ? '' : 'none';
+  el.style.display = '';
 }
-
-function resetAll(full = true) {
+function resetAll(full=true) {
   if (full) {
     pdfDoc = null;
     document.getElementById('file-input').value = '';
-    document.getElementById('status').style.display       = 'none';
-    document.getElementById('preview-wrap').style.display = 'none';
+    document.getElementById('card-status').style.display = 'none';
   }
   labelImages = [];
   document.getElementById('btn-proc').disabled  = true;
   document.getElementById('btn-print').disabled = true;
-  document.getElementById('result-info').style.display = 'none';
+  document.getElementById('alert-box').style.display  = 'none';
+  document.getElementById('preview-wrap').style.display = 'none';
   document.getElementById('prog-bar').style.width = '0%';
   document.getElementById('prog-msg').textContent = '';
   document.getElementById('print-area').innerHTML = '';
