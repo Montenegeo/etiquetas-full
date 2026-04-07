@@ -3,351 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conversor Etiquetas FULL — Montenegro</title>
+<title>Etiquetas FULL · Montenegro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:#0f172a; --surface:#1e293b; --border:#334155;
-    --blue:#2563eb; --blue-h:#1d4ed8; --blue-l:#3b82f6;
-    --text:#e2e8f0; --muted:#94a3b8;
-    --green:#22c55e; --radius:10px;
-  }
-  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; padding-bottom:60px; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f172a; --surface: #1e293b; --border: #334155;
+  --blue: #2563eb; --blue-h: #1d4ed8; --text: #e2e8f0; --muted: #94a3b8;
+}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  padding: 48px 20px;
+}
 
-  header { background:var(--surface); border-bottom:1px solid var(--border); padding:16px 24px; display:flex; align-items:center; gap:14px; }
-  .logo { width:36px;height:36px;background:var(--blue);border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:17px;color:#fff;flex-shrink:0; }
-  .header-text h1 { font-size:16px;font-weight:700; }
-  .header-text p  { font-size:12px;color:var(--muted);margin-top:2px; }
+.logo {
+  width: 48px; height: 48px; background: var(--blue); border-radius: 12px;
+  display: grid; place-items: center; font-weight: 900; font-size: 22px;
+  color: #fff; margin-bottom: 16px;
+}
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.sub { font-size: 14px; color: var(--muted); margin-bottom: 40px; }
 
-  main { max-width:860px;margin:28px auto;padding:0 18px;display:flex;flex-direction:column;gap:18px; }
+/* Drop zone */
+#drop-zone {
+  width: 100%; max-width: 520px;
+  border: 2px dashed var(--border); border-radius: 14px;
+  padding: 56px 32px; text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: var(--surface);
+}
+#drop-zone.over, #drop-zone:hover {
+  border-color: #3b82f6; background: rgba(37,99,235,.07);
+}
+#drop-zone svg { display: block; margin: 0 auto 16px; opacity: .45; }
+#drop-zone .cta { font-size: 16px; font-weight: 600; color: #3b82f6; }
+#drop-zone .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+#file-input { display: none; }
 
-  .card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px; }
-  .card-title { font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:14px; }
+/* Status card */
+#status-card {
+  display: none; width: 100%; max-width: 520px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px 28px 24px; margin-top: 20px;
+}
+.file-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.file-icon { width: 36px; height: 36px; background: rgba(37,99,235,.15); border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
+.file-name { font-size: 14px; font-weight: 600; }
+.file-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-  /* Upload */
-  #drop-zone { border:2px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s; }
-  #drop-zone.over,#drop-zone:hover { border-color:var(--blue-l);background:rgba(37,99,235,.07); }
-  #drop-zone svg { display:block;margin:0 auto 12px;opacity:.5; }
-  #drop-zone p { font-size:14px;color:var(--muted); }
-  #drop-zone strong { color:var(--blue-l); }
-  #file-input { display:none; }
+/* Progress */
+#prog-wrap { background: var(--bg); border-radius: 6px; height: 6px; overflow: hidden; margin-bottom: 8px; }
+#prog-bar { height: 100%; background: var(--blue); border-radius: 6px; width: 0%; transition: width .15s; }
+#prog-msg { font-size: 12px; color: var(--muted); min-height: 18px; }
 
-  /* Presets */
-  .presets { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px; }
-  .preset-btn {
-    padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
-    border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;
-  }
-  .preset-btn.active { background:var(--blue);border-color:var(--blue);color:#fff; }
-  .preset-btn:hover:not(.active) { border-color:var(--blue-l);color:var(--blue-l); }
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600;
+  cursor: pointer; border: none; transition: background .15s; width: 100%;
+  justify-content: center; margin-top: 14px;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover:not(:disabled) { background: var(--blue-h); }
+.btn-green { background: #16a34a; color: #fff; }
+.btn-green:hover:not(:disabled) { background: #15803d; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 8px 16px; margin-top: 10px; }
+.btn-ghost:hover { border-color: #3b82f6; color: #3b82f6; }
 
-  /* Tabs */
-  .mode-tabs { display:flex;gap:8px;margin-bottom:16px; }
-  .mode-tab { padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s; }
-  .mode-tab.active { background:var(--blue);border-color:var(--blue);color:#fff; }
+/* Result */
+#result-box {
+  display: none; margin-top: 14px;
+  background: rgba(22,163,74,.1); border: 1px solid rgba(34,197,94,.25);
+  border-radius: 8px; padding: 12px 16px;
+  font-size: 13px; color: #86efac; line-height: 1.5;
+}
 
-  /* Fields */
-  .config-row { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px; }
-  .field { display:flex;flex-direction:column;gap:5px; }
-  .field label { font-size:12px;color:var(--muted);font-weight:500; }
-  .field input,.field select { background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;padding:8px 10px;outline:none;transition:border-color .15s;width:100%; }
-  .field input:focus,.field select:focus { border-color:var(--blue-l); }
+/* Preview strip */
+#preview-strip {
+  display: none; width: 100%; max-width: 520px; margin-top: 20px;
+}
+#preview-strip .strip-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; text-align: center; }
+#strip-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px;
+}
+.strip-item { border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
+.strip-item img { display: block; width: 100%; height: auto; }
+.strip-item .n { font-size: 10px; color: var(--muted); text-align: center; padding: 2px; }
 
-  /* Info box */
-  .info-box { background:rgba(37,99,235,.1);border:1px solid rgba(59,130,246,.22);border-radius:8px;padding:10px 14px;font-size:13px;color:#93c5fd;line-height:1.5; }
-  .info-box strong { color:#bfdbfe; }
-  .info-box.warn { background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);color:#fcd34d; }
-  .info-box.warn strong { color:#fde68a; }
-
-  /* Buttons */
-  .btn { display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s; }
-  .btn:disabled { opacity:.4;cursor:not-allowed; }
-  .btn-primary { background:var(--blue);color:#fff; }
-  .btn-primary:hover:not(:disabled) { background:var(--blue-h); }
-  .btn-success { background:#16a34a;color:#fff; }
-  .btn-success:hover:not(:disabled) { background:#15803d; }
-  .btn-outline { background:transparent;border:1px solid var(--border);color:var(--text); }
-  .btn-outline:hover:not(:disabled) { border-color:var(--blue-l);color:var(--blue-l); }
-  .btn-row { display:flex;gap:10px;flex-wrap:wrap;align-items:center; }
-
-  /* Progress */
-  #progress-bar-wrap { display:none;background:var(--bg);border-radius:6px;height:6px;overflow:hidden;margin-top:12px; }
-  #progress-bar { height:100%;background:var(--blue);border-radius:6px;transition:width .1s;width:0%; }
-  #progress-label { font-size:12px;color:var(--muted);margin-top:6px;display:none; }
-
-  /* Preview */
-  #preview-section { display:none; }
-  #pages-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px; }
-  .page-thumb { border:1px solid var(--border);border-radius:6px;overflow:hidden; }
-  .page-thumb canvas { display:block;width:100%;height:auto; }
-  .page-thumb .thumb-label { text-align:center;padding:3px;font-size:10px;color:var(--muted); }
-
-  /* Label preview */
-  #labels-section { display:none; }
-  #labels-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;max-height:360px;overflow-y:auto;padding-right:4px; }
-  #labels-grid::-webkit-scrollbar { width:4px; }
-  #labels-grid::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
-  .label-thumb { border:1px solid var(--border);border-radius:5px;overflow:hidden; }
-  .label-thumb img { display:block;width:100%;height:auto; }
-  .label-thumb .lbl { font-size:10px;color:var(--muted);text-align:center;padding:3px; }
-
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-track { background:var(--bg); }
-  ::-webkit-scrollbar-thumb { background:var(--border);border-radius:3px; }
+footer { margin-top: 48px; font-size: 12px; color: #475569; text-align: center; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">M</div>
-  <div class="header-text">
-    <h1>Conversor Etiquetas FULL</h1>
-    <p>Shopee FULL · A4 → Térmica · Montenegro Indústria</p>
-  </div>
-</header>
+<div class="logo">M</div>
+<h1>Etiquetas FULL</h1>
+<p class="sub">Shopee FULL · A4 → Térmicas duplas 40×25mm</p>
 
-<main>
+<div id="drop-zone" onclick="document.getElementById('file-input').click()">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3">
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="12" y1="18" x2="12" y2="12"/>
+    <polyline points="9 15 12 12 15 15"/>
+  </svg>
+  <div class="cta">Arraste o PDF aqui ou clique para selecionar</div>
+  <div class="hint">Arquivo Print_Barcode do Shopee FULL (A4, grade 4×6)</div>
+</div>
+<input type="file" id="file-input" accept=".pdf">
 
-  <!-- UPLOAD -->
-  <div class="card">
-    <div class="card-title">1 · Selecionar PDF</div>
-    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+<div id="status-card">
+  <div class="file-row">
+    <div class="file-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
-        <line x1="12" y1="18" x2="12" y2="12"/>
-        <polyline points="9 15 12 12 15 15"/>
       </svg>
-      <p><strong>Clique para selecionar</strong> ou arraste o PDF aqui</p>
-      <p style="margin-top:5px;font-size:12px;">PDF com etiquetas A4 do Shopee FULL</p>
     </div>
-    <input type="file" id="file-input" accept=".pdf">
-    <div id="file-info" style="display:none;margin-top:10px;" class="info-box">
-      <strong id="file-name"></strong> · <span id="file-pages"></span>
+    <div>
+      <div class="file-name" id="fn">—</div>
+      <div class="file-meta" id="fm">—</div>
     </div>
   </div>
 
-  <!-- CONFIG -->
-  <div class="card">
-    <div class="card-title">2 · Configurar Formato</div>
+  <div id="prog-wrap"><div id="prog-bar"></div></div>
+  <div id="prog-msg"></div>
 
-    <!-- Presets -->
-    <div style="margin-bottom:12px;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Presets rápidos:</div>
-      <div class="presets">
-        <button class="preset-btn active" id="preset-full1" onclick="applyPreset('full1')">
-          FULL Barcode — grade 4×6 (40×25mm)
-        </button>
-        <button class="preset-btn" id="preset-full2" onclick="applyPreset('full2')">
-          FULL Duplas — 2 por tira (80×25mm)
-        </button>
-        <button class="preset-btn" id="preset-custom" onclick="applyPreset('custom')">
-          Personalizado
-        </button>
-      </div>
-    </div>
+  <button class="btn btn-blue" id="btn-convert" onclick="convert()" disabled>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+    </svg>
+    Converter para térmica
+  </button>
 
-    <!-- Mode tabs (hidden in preset mode, shown in custom) -->
-    <div id="mode-section">
-      <div class="mode-tabs">
-        <button class="mode-tab active" onclick="setMode('single')" id="tab-single">Uma por página</button>
-        <button class="mode-tab" onclick="setMode('grid')" id="tab-grid">Grade</button>
-      </div>
+  <button class="btn btn-green" id="btn-dl" onclick="download()" disabled>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Baixar PDF térmico
+  </button>
 
-      <div id="config-single">
-        <div class="info-box">
-          Cada página A4 = <strong>1 etiqueta</strong> completa.
-          O conteúdo inteiro será redimensionado para caber nas dimensões de saída.
-          Ideal para a maioria dos PDFs do Shopee FULL.
-        </div>
-      </div>
+  <div id="result-box"></div>
 
-      <div id="config-grid" style="display:none;">
-        <div class="config-row">
-          <div class="field">
-            <label>Colunas no A4</label>
-            <input type="number" id="cols" value="2" min="1" max="20">
-          </div>
-          <div class="field">
-            <label>Linhas no A4</label>
-            <input type="number" id="rows" value="1" min="1" max="50">
-          </div>
-          <div class="field">
-            <label>Margem topo/base (mm)</label>
-            <input type="number" id="margin-v" value="5" min="0" max="30" step="0.5">
-          </div>
-          <div class="field">
-            <label>Margem esq/dir (mm)</label>
-            <input type="number" id="margin-h" value="5" min="0" max="30" step="0.5">
-          </div>
-        </div>
-        <div style="margin-top:10px;" class="info-box">
-          Grade: <strong id="grid-info">2 colunas × 1 linha = 2 etiquetas por página</strong>
-        </div>
-      </div>
-    </div>
+  <button class="btn btn-ghost" onclick="reset()">Novo arquivo</button>
+</div>
 
-    <!-- Output dimensions -->
-    <div style="margin-top:18px;">
-      <div class="card-title" style="margin-bottom:10px;">Dimensões de saída (etiqueta térmica)</div>
-      <div class="config-row">
-        <div class="field">
-          <label>Largura (mm)</label>
-          <input type="number" id="out-w" value="40" min="10" max="200" step="0.5">
-        </div>
-        <div class="field">
-          <label>Altura (mm)</label>
-          <input type="number" id="out-h" value="25" min="5" max="200" step="0.5">
-        </div>
-        <div class="field">
-          <label>Resolução</label>
-          <select id="dpi">
-            <option value="150">150 DPI (rápido)</option>
-            <option value="200" selected>200 DPI (recomendado)</option>
-            <option value="300">300 DPI (nítido)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Orientação</label>
-          <select id="orientation">
-            <option value="landscape">Paisagem (larg × alt)</option>
-            <option value="portrait">Retrato (alt × larg)</option>
-          </select>
-        </div>
-      </div>
-    </div>
+<div id="preview-strip">
+  <div class="strip-title" id="strip-title">—</div>
+  <div id="strip-grid"></div>
+</div>
 
-    <div id="preset-hint" style="margin-top:12px;" class="info-box warn">
-      <strong>Preset: FULL Barcode — grade 4×6 → 40×25mm individual</strong><br>
-      PDF A4 com 4 colunas × 6 linhas (24 etiquetas/página). Extrai cada etiqueta em 40×25mm. Formato: <em>Print_Barcode_XXXX.pdf</em> do Shopee FULL.
-    </div>
-  </div>
-
-  <!-- PREVIEW -->
-  <div class="card" id="preview-section">
-    <div class="card-title">3 · Páginas do PDF</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;" id="pages-count">—</p>
-    <div id="pages-grid"></div>
-  </div>
-
-  <!-- PROCESS -->
-  <div class="card">
-    <div class="card-title">4 · Converter e Baixar</div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btn-process" onclick="processAll()" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-        </svg>
-        Converter PDF
-      </button>
-      <button class="btn btn-success" id="btn-download" onclick="downloadResult()" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Baixar PDF Térmico
-      </button>
-      <button class="btn btn-outline" id="btn-reset" onclick="resetAll()" style="display:none">
-        Novo arquivo
-      </button>
-    </div>
-    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
-    <div id="progress-label"></div>
-    <div id="result-info" style="margin-top:12px;display:none;" class="info-box"></div>
-  </div>
-
-  <!-- LABELS PREVIEW -->
-  <div class="card" id="labels-section">
-    <div class="card-title">Etiquetas geradas</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;" id="labels-count">—</p>
-    <div id="labels-grid"></div>
-  </div>
-
-  <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:4px;">
-    Processamento 100% local · nenhum arquivo enviado para servidores · Montenegro Indústria
-  </div>
-
-</main>
+<footer>Processamento local · nenhum arquivo enviado para servidores · Montenegro Indústria</footer>
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-let pdfDoc = null, resultPDF = null, labelImages = [];
-let mode = 'single';  // 'single' | 'grid'
-
-// ── Presets ────────────────────────────────────────────────────────────────
-const PRESETS = {
-  full1: {
-    mode: 'grid', cols: 4, rows: 6,
-    marginV: 4, marginH: 3,
-    outW: 40, outH: 25,
-    orient: 'landscape',
-    hint: '<strong>Preset: FULL Barcode — grade 4×6 → 40×25mm individual</strong><br>PDF A4 com 4 colunas × 6 linhas (24 etiquetas/página). Extrai cada etiqueta em 40×25mm. Formato: <em>Print_Barcode_XXXX.pdf</em> do Shopee FULL.'
-  },
-  full2: {
-    mode: 'grid', cols: 2, rows: 6,
-    marginV: 4, marginH: 3,
-    outW: 80, outH: 25,
-    orient: 'landscape',
-    hint: '<strong>Preset: FULL Duplas — 2 por tira → 80×25mm</strong><br>Agrupa pares lado a lado. Cada página = 1 tira 80×25mm com 2 etiquetas. Use se a impressora está configurada em 80mm de largura.'
-  },
-  custom: {
-    mode: 'grid', cols: 4, rows: 6,
-    marginV: 4, marginH: 3,
-    outW: 40, outH: 25,
-    orient: 'landscape',
-    hint: null
-  }
+// ── Hardcoded config for Shopee FULL Print_Barcode A4 ──────────────────────
+const CFG = {
+  cols:    4,      // 4 colunas de etiquetas no A4
+  rows:    6,      // 6 linhas por página (última página pode ter menos)
+  marginV: 4,      // mm topo/base
+  marginH: 3,      // mm esq/dir
+  dpi:     200,    // resolução de extração
+  outW:    80,     // mm largura da tira (dupla)
+  outH:    25,     // mm altura
 };
 
-let activePreset = 'full1';
-
-function applyPreset(key) {
-  activePreset = key;
-  ['full1','full2','custom'].forEach(k =>
-    document.getElementById('preset-' + k).classList.toggle('active', k === key));
-
-  const p = PRESETS[key];
-  setMode(p.mode);
-  if (p.cols) document.getElementById('cols').value = p.cols;
-  if (p.rows) document.getElementById('rows').value = p.rows;
-  if (p.marginV !== undefined) document.getElementById('margin-v').value = p.marginV;
-  if (p.marginH !== undefined) document.getElementById('margin-h').value = p.marginH;
-  document.getElementById('out-w').value = p.outW;
-  document.getElementById('out-h').value = p.outH;
-  document.getElementById('orientation').value = p.orient;
-
-  const hint = document.getElementById('preset-hint');
-  if (p.hint) {
-    hint.style.display = '';
-    hint.innerHTML = p.hint;
-  } else {
-    hint.style.display = 'none';
-  }
-  updateGridInfo();
-}
-
-// ── Mode ───────────────────────────────────────────────────────────────────
-function setMode(m) {
-  mode = m;
-  document.getElementById('tab-single').classList.toggle('active', m === 'single');
-  document.getElementById('tab-grid').classList.toggle('active', m === 'grid');
-  document.getElementById('config-single').style.display = m === 'single' ? '' : 'none';
-  document.getElementById('config-grid').style.display   = m === 'grid'   ? '' : 'none';
-}
-
-['cols','rows','margin-v','margin-h'].forEach(id =>
-  document.getElementById(id).addEventListener('input', updateGridInfo));
-
-function updateGridInfo() {
-  const c = parseInt(document.getElementById('cols').value) || 1;
-  const r = parseInt(document.getElementById('rows').value) || 1;
-  document.getElementById('grid-info').textContent =
-    `${c} colunas × ${r} linha(s) = ${c*r} etiqueta(s) por página`;
-}
+let pdfDoc = null, resultDoc = null, previewImages = [];
 
 // ── Drag & drop ────────────────────────────────────────────────────────────
 const dz = document.getElementById('drop-zone');
@@ -356,220 +183,193 @@ dz.addEventListener('dragleave', () => dz.classList.remove('over'));
 dz.addEventListener('drop', e => {
   e.preventDefault(); dz.classList.remove('over');
   const f = e.dataTransfer.files[0];
-  if (f && f.type === 'application/pdf') handleFile(f);
-  else alert('Selecione um arquivo PDF.');
+  if (f?.type === 'application/pdf') load(f);
+  else alert('Por favor selecione um arquivo PDF.');
 });
 document.getElementById('file-input').addEventListener('change', e => {
-  if (e.target.files[0]) handleFile(e.target.files[0]);
+  if (e.target.files[0]) load(e.target.files[0]);
 });
 
 // ── Load PDF ───────────────────────────────────────────────────────────────
-async function handleFile(file) {
-  resetState();
+async function load(file) {
+  reset(false);
   const buf = await file.arrayBuffer();
   pdfDoc = await pdfjsLib.getDocument(buf).promise;
 
-  document.getElementById('file-info').style.display = '';
-  document.getElementById('file-name').textContent   = file.name;
-  document.getElementById('file-pages').textContent  = `${pdfDoc.numPages} página(s)`;
-
-  await renderPreviews();
-  document.getElementById('btn-process').disabled = false;
+  document.getElementById('fn').textContent = file.name;
+  document.getElementById('fm').textContent =
+    `${pdfDoc.numPages} página(s) · até ${pdfDoc.numPages * CFG.cols * CFG.rows} etiquetas`;
+  document.getElementById('status-card').style.display = '';
+  document.getElementById('btn-convert').disabled = false;
+  setMsg('Pronto para converter.');
 }
 
-async function renderPreviews() {
-  const grid = document.getElementById('pages-grid');
-  grid.innerHTML = '';
-  document.getElementById('pages-count').textContent = `${pdfDoc.numPages} página(s)`;
-  document.getElementById('preview-section').style.display = '';
+// ── Convert ────────────────────────────────────────────────────────────────
+async function convert() {
+  if (!pdfDoc) return;
+  document.getElementById('btn-convert').disabled = true;
 
-  for (let n = 1; n <= Math.min(pdfDoc.numPages, 8); n++) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [CFG.outW, CFG.outH], compress: true });
+
+  const pxPerMm = CFG.dpi / 25.4;
+  const total   = pdfDoc.numPages;
+  let   strips  = [];   // all individual label dataURLs
+
+  // ── 1. Extract individual labels from every page ─────────────────────────
+  for (let n = 1; n <= total; n++) {
+    setProgress((n - 1) / total * 60, `Lendo página ${n} de ${total}…`);
+
     const page = await pdfDoc.getPage(n);
-    const vp   = page.getViewport({ scale: 0.28 });
-    const canvas = document.createElement('canvas');
-    canvas.width = vp.width; canvas.height = vp.height;
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-    const wrap = document.createElement('div');
-    wrap.className = 'page-thumb';
-    wrap.appendChild(canvas);
-    const lbl = document.createElement('div');
-    lbl.className = 'thumb-label';
-    lbl.textContent = `Pág. ${n}`;
-    wrap.appendChild(lbl);
-    grid.appendChild(wrap);
+    const vp   = page.getViewport({ scale: CFG.dpi / 72 });
+
+    const pc = document.createElement('canvas');
+    pc.width = vp.width; pc.height = vp.height;
+    const px = pc.getContext('2d');
+    px.fillStyle = '#ffffff';
+    px.fillRect(0, 0, pc.width, pc.height);
+    await page.render({ canvasContext: px, viewport: vp }).promise;
+
+    const mH   = CFG.marginH * pxPerMm;
+    const mV   = CFG.marginV * pxPerMm;
+    const aW   = pc.width  - 2 * mH;
+    const aH   = pc.height - 2 * mV;
+    const cW   = aW / CFG.cols;
+    const cH   = aH / CFG.rows;
+
+    for (let r = 0; r < CFG.rows; r++) {
+      for (let c = 0; c < CFG.cols; c++) {
+        const lc = document.createElement('canvas');
+        lc.width  = Math.round(cW);
+        lc.height = Math.round(cH);
+        const lx  = lc.getContext('2d');
+        lx.fillStyle = '#ffffff';
+        lx.fillRect(0, 0, lc.width, lc.height);
+        lx.drawImage(pc, mH + c * cW, mV + r * cH, cW, cH, 0, 0, lc.width, lc.height);
+
+        if (!isBlank(lc)) strips.push(lc.toDataURL('image/jpeg', 0.92));
+      }
+    }
   }
-  if (pdfDoc.numPages > 8) {
+
+  // ── 2. Pair labels into duplas (side by side on 80×25mm) ─────────────────
+  setProgress(70, `Montando ${strips.length} etiquetas em duplas…`);
+
+  previewImages = [];
+  let firstPage = true;
+
+  // output canvas dimensions at CFG.dpi
+  const outWpx = Math.round(CFG.outW * pxPerMm);
+  const outHpx = Math.round(CFG.outH * pxPerMm);
+  const halfW  = Math.round(outWpx / 2);
+
+  for (let i = 0; i < strips.length; i += 2) {
+    const dc = document.createElement('canvas');
+    dc.width  = outWpx; dc.height = outHpx;
+    const dx  = dc.getContext('2d');
+    dx.fillStyle = '#ffffff';
+    dx.fillRect(0, 0, outWpx, outHpx);
+
+    await drawImg(dx, strips[i],     0,     0, halfW, outHpx);
+    if (i + 1 < strips.length)
+      await drawImg(dx, strips[i+1], halfW, 0, halfW, outHpx);
+
+    // thin divider line between the two labels
+    dx.strokeStyle = '#cccccc';
+    dx.lineWidth   = 1;
+    dx.beginPath();
+    dx.moveTo(halfW, 0);
+    dx.lineTo(halfW, outHpx);
+    dx.stroke();
+
+    const dataUrl = dc.toDataURL('image/jpeg', 0.93);
+    if (!firstPage) doc.addPage([CFG.outW, CFG.outH], 'landscape');
+    firstPage = false;
+    doc.addImage(dataUrl, 'JPEG', 0, 0, CFG.outW, CFG.outH, '', 'FAST');
+    previewImages.push(dataUrl);
+  }
+
+  setProgress(100, '');
+  resultDoc = doc;
+
+  const nStrips = previewImages.length;
+  document.getElementById('result-box').style.display = '';
+  document.getElementById('result-box').innerHTML =
+    `✅ <strong>${strips.length} etiquetas</strong> → <strong>${nStrips} tiras duplas</strong> de 80×25mm · Pronto para imprimir na ELGIN.`;
+  document.getElementById('btn-dl').disabled = false;
+
+  renderPreview(nStrips);
+}
+
+// ── Draw image (async helper) ──────────────────────────────────────────────
+function drawImg(ctx, src, x, y, w, h) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => { ctx.drawImage(img, x, y, w, h); res(); };
+    img.src = src;
+  });
+}
+
+// ── Blank detection ────────────────────────────────────────────────────────
+function isBlank(canvas) {
+  const d = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  let dark = 0;
+  for (let i = 0; i < d.length; i += 4)
+    if ((d[i] + d[i+1] + d[i+2]) / 3 < 200) dark++;
+  return dark / (canvas.width * canvas.height) < 0.004;
+}
+
+// ── Preview ────────────────────────────────────────────────────────────────
+function renderPreview(total) {
+  const grid = document.getElementById('strip-grid');
+  grid.innerHTML = '';
+  document.getElementById('strip-title').textContent = `${total} tiras duplas geradas (prévia)`;
+  document.getElementById('preview-strip').style.display = '';
+  previewImages.slice(0, 12).forEach((src, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'strip-item';
+    const img = document.createElement('img'); img.src = src;
+    const n   = document.createElement('div'); n.className = 'n'; n.textContent = `#${i+1}`;
+    wrap.appendChild(img); wrap.appendChild(n);
+    grid.appendChild(wrap);
+  });
+  if (total > 12) {
     const more = document.createElement('div');
-    more.className = 'page-thumb';
-    more.style.display = 'grid';
-    more.style.placeItems = 'center';
-    more.style.minHeight = '80px';
-    more.style.fontSize = '12px';
-    more.style.color = 'var(--muted)';
-    more.textContent = `+${pdfDoc.numPages - 8} páginas`;
+    more.className = 'strip-item';
+    more.style.cssText = 'display:grid;place-items:center;min-height:50px;font-size:12px;color:var(--muted)';
+    more.textContent = `+${total - 12} mais`;
     grid.appendChild(more);
   }
 }
 
-// ── Process ────────────────────────────────────────────────────────────────
-async function processAll() {
-  if (!pdfDoc) return;
-
-  const outW   = parseFloat(document.getElementById('out-w').value) || 40;
-  const outH   = parseFloat(document.getElementById('out-h').value) || 25;
-  const dpi    = parseInt(document.getElementById('dpi').value) || 200;
-  const orient = document.getElementById('orientation').value;
-
-  document.getElementById('btn-process').disabled = true;
-  document.getElementById('progress-bar-wrap').style.display = '';
-  document.getElementById('progress-label').style.display    = '';
-
-  const { jsPDF } = window.jspdf;
-  const isLand = orient === 'landscape';
-  const pdfW   = isLand ? outW : outH;
-  const pdfH   = isLand ? outH : outW;
-
-  const doc = new jsPDF({ orientation: orient, unit: 'mm', format: [pdfW, pdfH], compress: true });
-
-  labelImages = [];
-  const total = pdfDoc.numPages;
-  let firstPage = true;
-
-  for (let n = 1; n <= total; n++) {
-    setProgress(((n-1)/total)*90, `Processando página ${n} de ${total}…`);
-
-    const page = await pdfDoc.getPage(n);
-    const scaleFactor = dpi / 72;
-    const vp = page.getViewport({ scale: scaleFactor });
-
-    const canvas = document.createElement('canvas');
-    canvas.width = vp.width; canvas.height = vp.height;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    await page.render({ canvasContext: ctx, viewport: vp }).promise;
-
-    const labels = mode === 'grid' ? extractGridLabels(canvas, dpi) : [canvas.toDataURL('image/jpeg', 0.92)];
-
-    for (const imgData of labels) {
-      if (!firstPage) doc.addPage([pdfW, pdfH], orient);
-      firstPage = false;
-      doc.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH, '', 'FAST');
-      labelImages.push(imgData);
-    }
-  }
-
-  setProgress(100, `Concluído! ${labelImages.length} etiqueta(s).`);
-  resultPDF = doc;
-
-  const info = document.getElementById('result-info');
-  info.style.display = '';
-  info.innerHTML = `✅ <strong>${labelImages.length} etiqueta(s)</strong> gerada(s) em ${outW}×${outH}mm · Pronto para imprimir na ELGIN.`;
-
-  document.getElementById('btn-download').disabled = false;
-  document.getElementById('btn-reset').style.display = '';
-  renderLabelPreviews();
-}
-
-// ── Grid extraction ────────────────────────────────────────────────────────
-function extractGridLabels(pageCanvas, dpi) {
-  const cols    = parseInt(document.getElementById('cols').value) || 2;
-  const rows    = parseInt(document.getElementById('rows').value) || 1;
-  const marginV = parseFloat(document.getElementById('margin-v').value) || 0;
-  const marginH = parseFloat(document.getElementById('margin-h').value) || 0;
-  const pxPerMm = dpi / 25.4;
-
-  const areaW = pageCanvas.width  - 2 * marginH * pxPerMm;
-  const areaH = pageCanvas.height - 2 * marginV * pxPerMm;
-  const cellW = areaW / cols;
-  const cellH = areaH / rows;
-
-  const result = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const sx = marginH * pxPerMm + c * cellW;
-      const sy = marginV * pxPerMm + r * cellH;
-      const lc = document.createElement('canvas');
-      lc.width  = Math.round(cellW);
-      lc.height = Math.round(cellH);
-      const lx = lc.getContext('2d');
-      lx.fillStyle = '#ffffff';
-      lx.fillRect(0, 0, lc.width, lc.height);
-      lx.drawImage(pageCanvas, sx, sy, cellW, cellH, 0, 0, lc.width, lc.height);
-      if (!isBlank(lc)) result.push(lc.toDataURL('image/jpeg', 0.92));
-    }
-  }
-  return result;
-}
-
-function isBlank(canvas) {
-  const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-  let dark = 0;
-  for (let i = 0; i < data.length; i += 4) {
-    if ((data[i] + data[i+1] + data[i+2]) / 3 < 200) dark++;
-  }
-  return dark / (canvas.width * canvas.height) < 0.004;
-}
-
-// ── Label preview ──────────────────────────────────────────────────────────
-function renderLabelPreviews() {
-  const grid = document.getElementById('labels-grid');
-  grid.innerHTML = '';
-  document.getElementById('labels-section').style.display = '';
-  document.getElementById('labels-count').textContent = `${labelImages.length} etiqueta(s)`;
-  labelImages.forEach((src, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'label-thumb';
-    const img = document.createElement('img');
-    img.src = src;
-    const lbl = document.createElement('div');
-    lbl.className = 'lbl';
-    lbl.textContent = `#${i+1}`;
-    wrap.appendChild(img);
-    wrap.appendChild(lbl);
-    grid.appendChild(wrap);
-  });
-}
-
 // ── Download ───────────────────────────────────────────────────────────────
-function downloadResult() {
-  if (!resultPDF) return;
-  const outW = document.getElementById('out-w').value;
-  const outH = document.getElementById('out-h').value;
-  resultPDF.save(`etiquetas_full_${outW}x${outH}mm_${labelImages.length}un.pdf`);
+function download() {
+  if (!resultDoc) return;
+  resultDoc.save(`etiquetas_full_${previewImages.length}tiras.pdf`);
 }
 
 // ── Progress ───────────────────────────────────────────────────────────────
 function setProgress(pct, msg) {
-  document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = msg;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-msg').textContent  = msg;
 }
+function setMsg(msg) { document.getElementById('prog-msg').textContent = msg; }
 
 // ── Reset ──────────────────────────────────────────────────────────────────
-function resetState() {
-  resultPDF = null; labelImages = [];
-  document.getElementById('btn-download').disabled = true;
-  document.getElementById('btn-reset').style.display = 'none';
-  document.getElementById('progress-bar-wrap').style.display = 'none';
-  document.getElementById('progress-label').style.display = 'none';
-  document.getElementById('progress-bar').style.width = '0%';
-  document.getElementById('result-info').style.display = 'none';
-  document.getElementById('labels-section').style.display = 'none';
-  document.getElementById('labels-grid').innerHTML = '';
+function reset(full = true) {
+  if (full) {
+    pdfDoc = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('status-card').style.display  = 'none';
+    document.getElementById('preview-strip').style.display = 'none';
+  }
+  resultDoc = null; previewImages = [];
+  document.getElementById('btn-convert').disabled = true;
+  document.getElementById('btn-dl').disabled      = true;
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('prog-bar').style.width = '0%';
+  document.getElementById('prog-msg').textContent = '';
 }
-
-function resetAll() {
-  pdfDoc = null;
-  document.getElementById('file-input').value = '';
-  document.getElementById('file-info').style.display = 'none';
-  document.getElementById('preview-section').style.display = 'none';
-  document.getElementById('pages-grid').innerHTML = '';
-  document.getElementById('btn-process').disabled = true;
-  resetState();
-}
-
-// init
-applyPreset('full1');
 </script>
 </body>
 </html>
